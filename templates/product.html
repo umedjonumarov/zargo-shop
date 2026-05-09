@@ -1,94 +1,201 @@
 {% extends "base.html" %}
+{% block title %}{{ product.name }} — ZarGo{% endblock %}
 
-{% block title %}{{ product.name }} - Zargo Shop{% endblock %}
+{% block extra_css %}
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--text-dim); font-size: 13px; text-decoration: none;
+  margin-bottom: 20px; transition: color 0.3s;
+}
+.back-link:hover { color: var(--gold); }
+
+.product-hero {
+  background: linear-gradient(135deg, rgba(244,167,0,0.12), rgba(0,200,150,0.06));
+  border: 1px solid rgba(244,167,0,0.2);
+  border-radius: 28px; padding: 32px 24px;
+  text-align: center; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.product-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(244,167,0,0.15) 0%, transparent 70%);
+}
+.product-big-emoji {
+  font-size: 90px; margin-bottom: 12px;
+  display: block; animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(244,167,0,0.4));
+  position: relative;
+}
+@keyframes float { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-12px) rotate(2deg)} }
+
+.product-cat-badge {
+  display: inline-block;
+  background: rgba(244,167,0,0.15); border: 1px solid rgba(244,167,0,0.3);
+  color: var(--gold); padding: 4px 12px; border-radius: 50px;
+  font-size: 11px; font-weight: 600; margin-bottom: 12px;
+}
+.product-title {
+  font-size: 24px; font-weight: 800; margin-bottom: 8px;
+}
+.product-price-big {
+  font-size: 36px; font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* Info rows */
+.info-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 16px; margin-bottom: 16px;
+}
+.info-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+}
+.info-row + .info-row { border-top: 1px solid rgba(255,255,255,0.05); }
+.info-icon {
+  width: 36px; height: 36px;
+  background: rgba(244,167,0,0.1); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.info-label { font-size: 12px; color: var(--text-dim); margin-bottom: 2px; }
+.info-value { font-size: 14px; font-weight: 600; }
+
+/* Qty control */
+.qty-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 16px 20px; margin-bottom: 20px;
+}
+.qty-label { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+.qty-control {
+  display: flex; align-items: center; gap: 16px;
+}
+.qty-btn {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--gold), #e09400);
+  border: none; border-radius: 12px; cursor: pointer;
+  font-size: 22px; font-weight: 700; color: #000;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; box-shadow: 0 4px 12px rgba(244,167,0,0.3);
+}
+.qty-btn:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(244,167,0,0.5); }
+.qty-btn:active { transform: scale(0.9); }
+.qty-input {
+  flex: 1; text-align: center;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+  border-radius: 12px; padding: 10px;
+  font-size: 20px; font-weight: 800; color: var(--text);
+  font-family: 'Poppins', sans-serif; outline: none;
+}
+.qty-total {
+  text-align: right; font-size: 12px; color: var(--text-dim);
+  margin-top: 10px;
+}
+.qty-total span { color: var(--gold); font-weight: 700; font-size: 15px; }
+
+.add-to-cart-btn {
+  width: 100%; padding: 16px; font-size: 16px;
+  justify-content: center; border-radius: 18px;
+}
+{% endblock %}
 
 {% block content %}
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    <!-- Chap tomon: Mahsulot rasmi (placeholder) -->
-    <div style="background: #f5f5f5; border-radius: 10px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
-        <div style="text-align: center; color: #999;">
-            <div style="font-size: 80px; margin-bottom: 10px;">🥬</div>
-            <p>{{ product.name }}</p>
-        </div>
-    </div>
+<a href="/" class="back-link">← Bosh sahifaga qaytish</a>
 
-    <!-- O'ng tomon: Ma'lumotlar -->
-    <div>
-        <div style="margin-bottom: 10px;">
-            <span style="background: #e8f5e9; color: #2c5530; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                {{ product.category }}
-            </span>
-        </div>
-        
-        <h1 style="margin-bottom: 15px; color: #333;">{{ product.name }}</h1>
-        
-        <div style="font-size: 32px; font-weight: bold; color: #2c5530; margin-bottom: 20px;">
-            {{ price }}
-        </div>
-        
-        <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 10px;">
-            <h4 style="margin-bottom: 10px;">📦 O'lchov birligi:</h4>
-            <p>
-                {% if product.splittable == 'Дона' %}
-                    ✅ Dona bilan sotiladi (1, 2, 3 dona...)
-                {% elif product.splittable == 'Грамм' %}
-                    ✅ Vazn bilan sotiladi (0.5 kg, 1 kg, 2 kg...)
-                {% else %}
-                    ✅ Faqat butun paket sotiladi
-                {% endif %}
-            </p>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-            <h4 style="margin-bottom: 10px;">🔢 Miqdor:</h4>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn btn-small" onclick="changeQty(-1)">-</button>
-                <input type="number" id="qty" value="1" min="1" style="width: 60px; padding: 8px; text-align: center; border: 1px solid #ddd; border-radius: 5px;">
-                <button class="btn btn-small" onclick="changeQty(1)">+</button>
-            </div>
-        </div>
-        
-        <button class="btn" style="width: 100%; padding: 15px; font-size: 18px;" onclick="addToCartDetail()">
-            🛒 Savatga qo'shish
-        </button>
-        
-        <div style="margin-top: 20px;">
-            <a href="/" style="color: #2c5530; text-decoration: none;">⬅️ Bosh sahifaga qaytish</a>
-        </div>
-    </div>
+<div class="product-hero">
+  <span class="product-big-emoji">🥗</span>
+  <div class="product-cat-badge">{{ product.category }}</div>
+  <h1 class="product-title">{{ product.name }}</h1>
+  <div class="product-price-big">{{ price }}</div>
 </div>
+
+<div class="info-card">
+  <div class="info-row">
+    <div class="info-icon">📦</div>
+    <div>
+      <div class="info-label">O'lchov birligi</div>
+      <div class="info-value">
+        {% if product.splittable == 'Дона' %}Dona bilan sotiladi
+        {% elif product.splittable == 'Грамм' %}Vazn bilan sotiladi (kg)
+        {% else %}Butun paket{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="info-row">
+    <div class="info-icon">🚚</div>
+    <div>
+      <div class="info-label">Yetkazib berish</div>
+      <div class="info-value">100с dan bepul</div>
+    </div>
+  </div>
+  <div class="info-row">
+    <div class="info-icon">✅</div>
+    <div>
+      <div class="info-label">Holat</div>
+      <div class="info-value" style="color: var(--green);">Mavjud</div>
+    </div>
+  </div>
+</div>
+
+<div class="qty-card">
+  <div class="qty-label">Miqdor tanlang:</div>
+  <div class="qty-control">
+    <button class="qty-btn" onclick="changeQty(-1)">−</button>
+    <input type="number" id="qty" class="qty-input" value="1" min="1" oninput="calcTotal()">
+    <button class="qty-btn" onclick="changeQty(1)">+</button>
+  </div>
+  <div class="qty-total">Jami: <span id="total-price">{{ product.somoni + product.diram/100 }}с</span></div>
+</div>
+
+<button class="btn add-to-cart-btn" onclick="addToCartDetail()">
+  🛒 Savatga qo'shish
+</button>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function changeQty(delta) {
-    const input = document.getElementById('qty');
-    let val = parseInt(input.value) + delta;
-    if (val < 1) val = 1;
-    input.value = val;
-}
+const unitPrice = {{ product.somoni + product.diram/100 }};
 
+function changeQty(d) {
+  const inp = document.getElementById('qty');
+  let v = parseInt(inp.value) + d;
+  if(v < 1) v = 1;
+  inp.value = v;
+  calcTotal();
+}
+function calcTotal() {
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  document.getElementById('total-price').textContent = (unitPrice * qty).toFixed(2) + 'с';
+}
 function addToCartDetail() {
-    const qty = parseInt(document.getElementById('qty').value);
-    const price = {{ product.somoni }} + {{ product.diram }}/100;
-    
-    fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            name: '{{ product.name }}',
-            qty: qty,
-            unit: '{% if product.splittable == "Дона" %}дона{% elif product.splittable == "Грамм" %}кг{% else %}пакет{% endif %}',
-            price_total: price * qty
-        })
+  const qty = parseInt(document.getElementById('qty').value);
+  const btn = document.querySelector('.add-to-cart-btn');
+  btn.textContent = '⏳ Qo\'shilmoqda...';
+  btn.disabled = true;
+
+  fetch('/api/cart/add', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      name: '{{ product.name }}',
+      qty,
+      unit: '{% if product.splittable == "Дона" %}dona{% elif product.splittable == "Грамм" %}kg{% else %}paket{% endif %}',
+      price_total: unitPrice * qty
     })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Savatga qo\'shildi!');
-            updateCartCount();
-        }
-    });
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success) {
+      btn.textContent = '✅ Qo\'shildi!';
+      btn.style.background = 'linear-gradient(135deg,var(--green),#009970)';
+      showToast('✅ Savatga qo\'shildi!');
+      updateCartCount();
+      setTimeout(() => {
+        btn.textContent = '🛒 Savatga qo\'shish';
+        btn.style.background = '';
+        btn.disabled = false;
+      }, 2000);
+    }
+  });
 }
 </script>
 {% endblock %}

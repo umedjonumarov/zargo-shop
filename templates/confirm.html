@@ -1,101 +1,217 @@
 {% extends "base.html" %}
-{% block title %}Buyurtma tasdiqlandi — Zargo Shop{% endblock %}
+{% block title %}Buyurtma tasdiqlandi — ZarGo{% endblock %}
 
 {% block extra_css %}
-<style>
-.success-wrap {
-    max-width: 480px;
-    margin: 0 auto;
-    text-align: center;
+.confirm-wrap {
+  text-align: center; padding: 10px 0 20px;
 }
-.success-icon {
-    width: 90px; height: 90px;
-    background: var(--green-light);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px;
-    margin: 0 auto 20px;
-}
-.order-number {
-    font-size: 48px; font-weight: 800;
-    color: var(--green); letter-spacing: -2px;
-    margin-bottom: 8px;
-}
-.success-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
-.success-subtitle { color: var(--muted); font-size: 15px; margin-bottom: 28px; line-height: 1.5; }
 
-.order-info {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    text-align: left;
-    margin-bottom: 20px;
+/* Success animation */
+.success-ring {
+  width: 110px; height: 110px; margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0,200,150,0.2), rgba(0,200,150,0.05));
+  border: 2px solid rgba(0,200,150,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+  animation: ring-pop 0.6s cubic-bezier(.17,.67,.32,1.4) both;
+  box-shadow: 0 0 40px rgba(0,200,150,0.3), 0 0 80px rgba(0,200,150,0.1);
+  position: relative;
 }
-.order-info-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
+.success-ring::before {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,200,150,0.2);
+  animation: pulse-ring 2s ease-out infinite;
 }
-.order-info-row:last-child { border-bottom: none; }
-.order-info-row .icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
-.order-info-row .label { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
-.order-info-row .value { font-weight: 600; }
+@keyframes ring-pop {
+  0%   { transform: scale(0) rotate(-20deg); opacity:0; }
+  100% { transform: scale(1) rotate(0deg);   opacity:1; }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
 
-.delivery-info {
-    background: var(--green-light);
-    border-radius: var(--radius-sm);
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    display: flex; gap: 12px; align-items: center;
-    text-align: left; font-size: 14px;
+.confirm-title {
+  font-size: 26px; font-weight: 900; margin-bottom: 6px;
+  background: linear-gradient(90deg, var(--green), #00ffcc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-.delivery-info-icon { font-size: 28px; }
+.order-num {
+  font-size: 42px; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin: 8px 0 4px;
+  animation: shimmer 2s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.7} }
+.confirm-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.5; }
+
+/* Details card */
+.details-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left;
+}
+.details-title {
+  font-size: 13px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+}
+.detail-row {
+  display: flex; align-items: flex-start; gap: 12px; padding: 8px 0;
+}
+.detail-row + .detail-row { border-top: 1px solid rgba(255,255,255,0.05); }
+.detail-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  background: rgba(244,167,0,0.1); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.detail-label { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
+.detail-value { font-size: 14px; font-weight: 600; }
+.detail-total { font-size: 20px; font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* Status steps */
+.status-steps {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 16px 12px; margin-bottom: 20px;
+}
+.step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex: 1;
+}
+.step-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.step.done .step-dot {
+  background: linear-gradient(135deg, var(--green), #009970);
+  box-shadow: 0 0 15px rgba(0,200,150,0.4);
+}
+.step.pending .step-dot {
+  background: rgba(255,255,255,0.07); border: 1px solid var(--glass-border);
+}
+.step-label { font-size: 10px; color: var(--text-dim); text-align: center; }
+.step.done .step-label { color: var(--green); font-weight: 600; }
+.step-line { flex: 1; height: 2px; background: rgba(255,255,255,0.08); margin-top: -22px; }
+.step-line.done { background: linear-gradient(90deg, var(--green), rgba(0,200,150,0.2)); }
 
 .action-btns { display: flex; flex-direction: column; gap: 10px; }
-</style>
+.action-btns .btn { justify-content: center; padding: 14px; }
+
+.wa-cta {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #fff; border: none; border-radius: 50px;
+  padding: 14px; font-size: 15px; font-weight: 700;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(37,211,102,0.4);
+  transition: all 0.3s;
+}
+.wa-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(37,211,102,0.5); }
 {% endblock %}
 
 {% block content %}
-<div class="success-wrap">
-    <div class="success-icon">🎉</div>
-    <div class="order-number">#{{ order_number }}</div>
-    <div class="success-title">Buyurtma qabul qilindi!</div>
-    <div class="success-subtitle">Tez orada siz bilan bog'lanamiz va yetkazib beramiz.</div>
+<div class="confirm-wrap">
+  <div class="success-ring">🎉</div>
+  <div class="confirm-title">Buyurtma qabul qilindi!</div>
+  <div class="order-num">#{{ order_number }}</div>
+  <p class="confirm-sub">Tez orada siz bilan bog'lanamiz.<br>Buyurtmangiz 30–60 daqiqada yetkaziladi.</p>
 
-    <div class="order-info">
-        <div class="order-info-row">
-            <div class="icon">👤</div>
-            <div><div class="label">Ism</div><div class="value">{{ name }}</div></div>
-        </div>
-        <div class="order-info-row">
-            <div class="icon">📱</div>
-            <div><div class="label">Telefon</div><div class="value">{{ phone }}</div></div>
-        </div>
-        <div class="order-info-row">
-            <div class="icon">📍</div>
-            <div><div class="label">Manzil</div><div class="value">{{ address }}</div></div>
-        </div>
-        <div class="order-info-row">
-            <div class="icon">💰</div>
-            <div><div class="label">Jami summa</div><div class="value" style="color:var(--green);font-size:18px;">{{ total }}с</div></div>
-        </div>
+  <!-- Status steps -->
+  <div class="status-steps">
+    <div class="step done">
+      <div class="step-dot">✅</div>
+      <div class="step-label">Qabul</div>
     </div>
+    <div class="step-line done"></div>
+    <div class="step pending">
+      <div class="step-dot">🍳</div>
+      <div class="step-label">Tayyorlanmoqda</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending">
+      <div class="step-dot">🚚</div>
+      <div class="step-label">Yetkazilmoqda</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending">
+      <div class="step-dot">🏠</div>
+      <div class="step-label">Yetkazildi</div>
+    </div>
+  </div>
 
-    <div class="delivery-info">
-        <div class="delivery-info-icon">🚚</div>
-        <div>
-            <div style="font-weight:600;margin-bottom:3px;">30–60 daqiqa ichida yetkazamiz</div>
-            <div style="color:var(--muted);">To'lov: naqd pul, yetkazib berganda</div>
-        </div>
+  <!-- Details -->
+  <div class="details-card">
+    <div class="details-title">📋 Buyurtma tafsilotlari</div>
+    <div class="detail-row">
+      <div class="detail-icon">👤</div>
+      <div>
+        <div class="detail-label">Mijoz</div>
+        <div class="detail-value">{{ name }}</div>
+      </div>
     </div>
+    <div class="detail-row">
+      <div class="detail-icon">📱</div>
+      <div>
+        <div class="detail-label">Telefon</div>
+        <div class="detail-value">{{ phone }}</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-icon">📍</div>
+      <div>
+        <div class="detail-label">Manzil</div>
+        <div class="detail-value">{{ address }}</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-icon">💰</div>
+      <div>
+        <div class="detail-label">Jami summa</div>
+        <div class="detail-value detail-total">{{ total }}с</div>
+      </div>
+    </div>
+  </div>
 
-    <div class="action-btns">
-        <a href="/" class="btn btn-full">🛒 Yana xarid qilish</a>
-        <a href="https://wa.me/79099885383" class="btn btn-full" style="background:#25d366;">
-            💬 WhatsApp orqali bog'lanish
-        </a>
-    </div>
+  <div class="action-btns">
+    <a href="https://wa.me/992909885383" target="_blank" class="wa-cta">
+      💬 WhatsApp orqali kuzatish
+    </a>
+    <a href="/" class="btn" style="justify-content:center;">🛒 Yana xarid qilish</a>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* Confetti burst on load */
+  (function(){
+    const colors = ['#f4a700','#ffd700','#00c896','#ff4d6d','#fff'];
+    for(let i = 0; i < 40; i++){
+      const el = document.createElement('div');
+      const size = 6 + Math.random() * 8;
+      el.style.cssText = `
+        position:fixed; z-index:9999; pointer-events:none;
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+        left:${Math.random()*100}vw; top:-20px;
+        opacity:1;
+        animation: confetti-fall ${1.5+Math.random()*2}s ease-in ${Math.random()*0.8}s forwards;
+      `;
+      document.body.appendChild(el);
+    }
+    const style = document.createElement('style');
+    style.textContent = `@keyframes confetti-fall {
+      to { transform: translateY(110vh) rotate(${360+Math.random()*360}deg); opacity:0; }
+    }`;
+    document.head.appendChild(style);
+  })();
+</script>
 {% endblock %}
