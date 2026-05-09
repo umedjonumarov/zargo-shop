@@ -58,33 +58,56 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.toast {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2c5530;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
+<div class="toast" id="toast"></div>
 <script>
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 function addToCart(name, price) {
-    // Mahsulot turini aniqlash
     let qty = 1;
     let unit = 'пакет';
-    
-    // Agar dona bo'lsa
-    if (name.includes('дона')) {
-        qty = 1;
-        unit = 'дона';
-    }
-    
+    if (name.includes('дона')) { qty = 1; unit = 'дона'; }
+
     fetch('/api/cart/add', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            name: name,
-            qty: qty,
-            unit: unit,
-            price_total: price
-        })
+        body: JSON.stringify({ name, qty, unit, price_total: price })
     })
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            alert('✅ ' + name + ' savatga qo\'shildi!');
+            showToast('✅ ' + name + ' savatga qo\'shildi!');
             updateCartCount();
         }
     });
