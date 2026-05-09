@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Buyurtma - Zargo Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    @media (max-width: 700px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #2c5530;
+        box-shadow: 0 0 0 3px rgba(44,85,48,0.1);
+    }
+    .phone-prefilled {
+        background: #f0fff4;
+        border-color: #2c5530 !important;
+    }
+    .prefilled-note {
+        color: #2c5530;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .order-item:last-of-type {
+        border-bottom: none;
+    }
+    .order-total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0 0;
+        margin-top: 10px;
+        border-top: 2px solid #2c5530;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c5530;
+    }
+    .submit-btn {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 20px;">📋 Buyurtma rasmiylashtirish</h1>
+
+<div class="checkout-grid">
+    <!-- Chap tomon: Tanlangan mahsulotlar -->
+    <div>
+        <h3 style="margin-bottom: 15px;">🛒 Tanlangan mahsulotlar:</h3>
+        <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            {% for item in cart %}
+            <div class="order-item">
+                <span>{{ item.name }} × {{ item.qty }}</span>
+                <strong>{{ item.price_total }}с</strong>
+            </div>
+            {% endfor %}
+            <div class="order-total-row">
+                <span>Jami:</span>
+                <span>{{ total }}с</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 10px; color: #2c5530;">
+            🚚 <strong>100 сомонидan oshiq buyurtmalarga bepul yetkazish!</strong>
+        </div>
+
+        <div style="margin-top: 15px; padding: 15px; background: #fff8e1; border-radius: 10px; color: #555; font-size: 14px;">
+            💳 <strong>To'lov usuli:</strong> Naqd pul (yetkazib berganda)<br>
+            ⏱ <strong>Yetkazish vaqti:</strong> 30–60 daqiqa
+        </div>
+    </div>
+
+    <!-- O'ng tomon: Forma -->
+    <div>
+        <h3 style="margin-bottom: 15px;">👤 Ma'lumotlaringiz:</h3>
+        <form method="POST" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+
+            <div class="form-group">
+                <label>Ismingiz:</label>
+                <input type="text" name="name" required placeholder="Masalan: Aziz" autocomplete="name">
+            </div>
+
+            <div class="form-group">
+                <label>Telefon raqamingiz:</label>
+                <input type="tel" name="phone" required
+                       placeholder="+992 90 123 45 67"
+                       value="{{ prefill_phone }}"
+                       class="{{ 'phone-prefilled' if prefill_phone else '' }}"
+                       autocomplete="tel">
+                {% if prefill_phone %}
+                <div class="prefilled-note">✅ WhatsApp raqamingiz avtomatik to'ldirildi</div>
+                {% else %}
+                <small style="color: #666; display: block; margin-top: 4px;">
+                    Format: +992 XX XXX XX XX
+                </small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Yetkazish manzili:</label>
+                <textarea name="address" required
+                          placeholder="Masalan: Zarzamin qishlog'i, ko'cha, uy raqami"
+                          style="min-height: 90px; resize: vertical;"
+                          autocomplete="street-address"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <a href="/cart" class="btn btn-danger"
+                   style="text-decoration: none; flex: 1; text-align: center; padding: 12px;">
+                    ⬅️ Orqaga
+                </a>
+                <button type="submit" class="btn submit-btn" style="flex: 2;">
+                    ✅ Buyurtma berish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

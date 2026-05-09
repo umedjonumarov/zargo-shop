@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Zargo Shop{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <!-- Chap tomon: Mahsulot rasmi (placeholder) -->
+    <div style="background: #f5f5f5; border-radius: 10px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
+        <div style="text-align: center; color: #999;">
+            <div style="font-size: 80px; margin-bottom: 10px;">🥬</div>
+            <p>{{ product.name }}</p>
+        </div>
+    </div>
+
+    <!-- O'ng tomon: Ma'lumotlar -->
+    <div>
+        <div style="margin-bottom: 10px;">
+            <span style="background: #e8f5e9; color: #2c5530; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
+                {{ product.category }}
+            </span>
+        </div>
+        
+        <h1 style="margin-bottom: 15px; color: #333;">{{ product.name }}</h1>
+        
+        <div style="font-size: 32px; font-weight: bold; color: #2c5530; margin-bottom: 20px;">
+            {{ price }}
+        </div>
+        
+        <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 10px;">
+            <h4 style="margin-bottom: 10px;">📦 O'lchov birligi:</h4>
+            <p>
+                {% if product.splittable == 'Дона' %}
+                    ✅ Dona bilan sotiladi (1, 2, 3 dona...)
+                {% elif product.splittable == 'Грамм' %}
+                    ✅ Vazn bilan sotiladi (0.5 kg, 1 kg, 2 kg...)
+                {% else %}
+                    ✅ Faqat butun paket sotiladi
+                {% endif %}
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 10px;">🔢 Miqdor:</h4>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn btn-small" onclick="changeQty(-1)">-</button>
+                <input type="number" id="qty" value="1" min="1" style="width: 60px; padding: 8px; text-align: center; border: 1px solid #ddd; border-radius: 5px;">
+                <button class="btn btn-small" onclick="changeQty(1)">+</button>
+            </div>
+        </div>
+        
+        <button class="btn" style="width: 100%; padding: 15px; font-size: 18px;" onclick="addToCartDetail()">
+            🛒 Savatga qo'shish
+        </button>
+        
+        <div style="margin-top: 20px;">
+            <a href="/" style="color: #2c5530; text-decoration: none;">⬅️ Bosh sahifaga qaytish</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+    const input = document.getElementById('qty');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    input.value = val;
+}
+
+function addToCartDetail() {
+    const qty = parseInt(document.getElementById('qty').value);
+    const price = {{ product.somoni }} + {{ product.diram }}/100;
+    
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            name: '{{ product.name }}',
+            qty: qty,
+            unit: '{% if product.splittable == "Дона" %}дона{% elif product.splittable == "Грамм" %}кг{% else %}пакет{% endif %}',
+            price_total: price * qty
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Savatga qo\'shildi!');
+            updateCartCount();
+        }
+    });
+}
+</script>
+{% endblock %}

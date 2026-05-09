@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Buyurtma tasdiqlandi - Zargo Shop{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+    
+    <h1 style="color: #2c5530; margin-bottom: 15px;">Buyurtma qabul qilindi!</h1>
+    
+    <div style="font-size: 48px; font-weight: bold; color: #2c5530; margin-bottom: 10px;">
+        #{{ order_number }}
+    </div>
+    
+    <p style="color: #666; margin-bottom: 30px; font-size: 18px;">
+        Buyurtmangiz muvaffaqiyatli qabul qilindi. Tez orada siz bilan bog'lanamiz.
+    </p>
+    
+    <div style="background: #f5f5f5; border-radius: 10px; padding: 25px; max-width: 500px; margin: 0 auto 30px; text-align: left;">
+        <h3 style="margin-bottom: 15px; color: #333;">📋 Buyurtma ma'lumotlari:</h3>
+        
+        <div style="margin-bottom: 10px;">
+            <strong>👤 Ism:</strong> {{ name }}
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+            <strong>📱 Telefon:</strong> {{ phone }}
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+            <strong>📍 Manzil:</strong> {{ address }}
+        </div>
+        
+        <div style="margin-bottom: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+            <strong>💰 Jami:</strong> <span style="color: #2c5530; font-size: 20px; font-weight: bold;">{{ total }}с</span>
+        </div>
+    </div>
+    
+    <div style="margin-bottom: 30px; padding: 15px; background: #e8f5e9; border-radius: 10px; color: #2c5530;">
+        <strong>📞 Yetkazish vaqti:</strong> 30-60 daqiqa ichida<br>
+        <strong>💳 To'lov usuli:</strong> Naqd pul (yetkazib berganda)
+    </div>
+    
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <a href="/" class="btn" style="text-decoration: none;">🛒 Yana xarid qilish</a>
+        <a href="https://wa.me/79099885383"
+           class="btn" style="text-decoration: none; background: #25d366;">
+            💬 WhatsApp orqali bog'lanish
+        </a>
+    </div>
+
+    <p style="margin-top: 25px; color: #999; font-size: 13px;">
+        Buyurtma statusini kuzatish uchun WhatsApp'ga yozing yoki telefon orqali bog'laning.
+    </p>
+</div>
+{% endblock %}
