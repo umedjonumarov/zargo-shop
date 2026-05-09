@@ -1,116 +1,353 @@
 {% extends "base.html" %}
-
-{% block title %}Bosh sahifa - Zargo Shop{% endblock %}
-
-{% block content %}
-<h1 style="text-align: center; margin-bottom: 10px;">🥬 Zargo Shop</h1>
-<p style="text-align: center; color: #666; margin-bottom: 30px;">
-    Zarzamin qishlog'iga yetkazib berish xizmati | 
-    <strong>100 сомонидан bepul</strong>
-</p>
-
-<div class="categories">
-    {% for category, products in categories.items() %}
-    <div class="category-card">
-        <h2>
-            {% if category == 'Нонушта' %}🍳{% endif %}
-            {% if category == 'Кунлик' %}🥦{% endif %}
-            {% if category == 'Узоқ муддат' %}🥫{% endif %}
-            {{ category }}
-        </h2>
-        <ul class="product-list">
-            {% for product in products %}
-            <li class="product-item">
-                <div>
-                    <div class="product-name">{{ product.name }}</div>
-                    <div style="font-size: 12px; color: #666;">
-                        {% if product.splittable == 'Дона' %}
-                            [дона билан]
-                        {% elif product.splittable == 'Грамм' %}
-                            [вес билан]
-                        {% else %}
-                            [пакет]
-                        {% endif %}
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="product-price">
-                        {{ product.somoni }}с
-                        {% if product.diram %}{{ product.diram }}дирам{% endif %}
-                    </div>
-                    <button class="btn btn-small" onclick="addToCart('{{ product.name }}', {{ product.somoni + product.diram/100 }})">
-                        + Savatga
-                    </button>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endfor %}
-</div>
-
-<div style="text-align: center; margin-top: 40px; padding: 20px; background: white; border-radius: 10px;">
-    <h3>📱 WhatsApp orqali buyurtma</h3>
-    <p>Telefon orqali buyurtma berishni xohlaysizmi?</p>
-    <a href="https://wa.me/9929099885383" class="btn" style="display: inline-block; margin-top: 10px; text-decoration: none;">
-        WhatsApp'ga o'tish
-    </a>
-</div>
-{% endblock %}
+{% block title %}ZarGo — Oziq-ovqat Do'koni{% endblock %}
 
 {% block extra_css %}
-<style>
-.toast {
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #2c5530;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+/* ── Hero ── */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 36px 20px 28px;
+  margin-bottom: 24px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(244,167,0,0.12), rgba(0,200,150,0.06));
+  border: 1px solid rgba(244,167,0,0.2);
+  overflow: hidden;
 }
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(244,167,0,0.2) 0%, transparent 70%);
 }
-</style>
+.hero-emoji-row {
+  display: flex; justify-content: center; gap: 10px;
+  margin-bottom: 16px; position: relative;
+}
+.hero-emoji {
+  font-size: 36px;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(244,167,0,0.5));
+}
+.hero-emoji:nth-child(1) { animation-delay: 0s; }
+.hero-emoji:nth-child(2) { animation-delay: 0.4s; font-size: 44px; }
+.hero-emoji:nth-child(3) { animation-delay: 0.8s; }
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
+}
+.hero-title {
+  font-size: 32px; font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), var(--gold2), #fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 8px; position: relative; letter-spacing: -1px;
+}
+.hero-sub {
+  font-size: 14px; color: var(--text-dim); line-height: 1.5; position: relative;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(0,200,150,0.2), rgba(0,200,150,0.1));
+  border: 1px solid rgba(0,200,150,0.4);
+  color: #00e5aa; padding: 6px 14px; border-radius: 50px;
+  font-size: 12px; font-weight: 600; margin-top: 12px;
+}
+
+/* ── Search ── */
+.search-wrap {
+  position: relative; margin-bottom: 24px;
+}
+.search-input {
+  width: 100%;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 14px 48px 14px 18px;
+  font-size: 14px; font-family: 'Poppins',sans-serif;
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  outline: none; transition: all 0.3s;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus {
+  border-color: rgba(244,167,0,0.5);
+  box-shadow: 0 0 0 3px rgba(244,167,0,0.1);
+}
+.search-icon {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; pointer-events: none;
+}
+
+/* ── Category tabs ── */
+.cat-tabs {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 20px; scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  padding: 8px 16px; border-radius: 50px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: 'Poppins',sans-serif;
+  background: var(--glass); color: var(--text-dim);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s;
+}
+.cat-tab.active, .cat-tab:hover {
+  background: linear-gradient(135deg, var(--gold), #e09400);
+  color: #000; border-color: transparent;
+  box-shadow: 0 4px 15px rgba(244,167,0,0.3);
+}
+
+/* ── Category section ── */
+.cat-section { margin-bottom: 28px; display: none; }
+.cat-section.visible { display: block; animation: fadeInUp 0.4s ease; }
+@keyframes fadeInUp {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.cat-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.cat-header-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, rgba(244,167,0,0.2), rgba(244,167,0,0.1));
+  border: 1px solid rgba(244,167,0,0.3);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.cat-header-title {
+  font-size: 18px; font-weight: 700;
+  background: linear-gradient(90deg, var(--gold), #fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── Product cards ── */
+.products-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.product-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.17,.67,.32,1.2);
+  transform-style: preserve-3d;
+  position: relative; overflow: hidden;
+}
+.product-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(244,167,0,0.04), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.product-card:hover {
+  border-color: rgba(244,167,0,0.35);
+  transform: translateX(4px) rotateY(-1deg);
+  box-shadow: -4px 8px 30px rgba(0,0,0,0.3), 0 0 20px rgba(244,167,0,0.08);
+}
+.product-card:hover::before { opacity: 1; }
+
+.product-emoji {
+  width: 54px; height: 54px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(244,167,0,0.15), rgba(244,167,0,0.05));
+  border: 1px solid rgba(244,167,0,0.2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  transition: transform 0.3s;
+}
+.product-card:hover .product-emoji { transform: scale(1.1) rotate(-5deg); }
+
+.product-info { flex: 1; min-width: 0; }
+.product-name {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.product-unit {
+  font-size: 11px; color: var(--text-dim);
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px; padding: 2px 6px; display: inline-block;
+}
+
+.product-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.product-price {
+  font-size: 16px; font-weight: 800;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  white-space: nowrap;
+}
+
+.add-btn {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--gold), #e09400);
+  border: none; border-radius: 10px; cursor: pointer;
+  font-size: 20px; font-weight: 700; color: #000;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s; box-shadow: 0 4px 12px rgba(244,167,0,0.3);
+  transform-style: preserve-3d;
+}
+.add-btn:hover {
+  transform: rotateX(20deg) scale(1.1);
+  box-shadow: 0 8px 20px rgba(244,167,0,0.5);
+}
+.add-btn:active { transform: scale(0.9); }
+
+/* ── WhatsApp section ── */
+.wa-section {
+  background: linear-gradient(135deg, rgba(37,211,102,0.12), rgba(37,211,102,0.04));
+  border: 1px solid rgba(37,211,102,0.3);
+  border-radius: 24px; padding: 24px;
+  text-align: center; margin-top: 12px;
+  position: relative; overflow: hidden;
+}
+.wa-section::before {
+  content: '💬';
+  position: absolute; right: -10px; bottom: -10px;
+  font-size: 80px; opacity: 0.06;
+}
+.wa-icon { font-size: 48px; margin-bottom: 12px; animation: float 2s ease-in-out infinite; }
+.wa-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.wa-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
+.wa-btn {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #fff; border: none; cursor: pointer;
+  padding: 13px 28px; border-radius: 50px;
+  font-size: 15px; font-weight: 700; font-family: 'Poppins',sans-serif;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 25px rgba(37,211,102,0.4);
+  transition: all 0.3s;
+}
+.wa-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(37,211,102,0.5); }
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-emoji-row">
+    <span class="hero-emoji">🥬</span>
+    <span class="hero-emoji">🛒</span>
+    <span class="hero-emoji">🍎</span>
+  </div>
+  <h1 class="hero-title">ZarGo</h1>
+  <p class="hero-sub">Zarzamin qishlog'iga toza va mazali<br>oziq-ovqatlar yetkazib beramiz</p>
+  <div class="hero-badge">🚚 100с dan bepul yetkazib berish</div>
+</div>
+
+<!-- Search -->
+<div class="search-wrap">
+  <input class="search-input" type="text" id="search" placeholder="Mahsulot qidirish..." oninput="filterProducts()">
+  <span class="search-icon">🔍</span>
+</div>
+
+<!-- Category tabs -->
+<div class="cat-tabs">
+  <button class="cat-tab active" onclick="showCat('all', this)">🌟 Barchasi</button>
+  {% for category in categories.keys() %}
+  <button class="cat-tab" onclick="showCat('{{ category }}', this)">
+    {% if category == 'Нонушта' %}🍳{% elif category == 'Кунлик' %}🥦{% elif category == 'Узоқ муддат' %}🥫{% else %}🛍️{% endif %}
+    {{ category }}
+  </button>
+  {% endfor %}
+</div>
+
+<!-- Products by category -->
+{% for category, products in categories.items() %}
+<div class="cat-section visible" data-cat="{{ category }}">
+  <div class="cat-header">
+    <div class="cat-header-icon">
+      {% if category == 'Нонушта' %}🍳{% elif category == 'Кунлик' %}🥦{% elif category == 'Узоқ муддат' %}🥫{% else %}🛍️{% endif %}
+    </div>
+    <span class="cat-header-title">{{ category }}</span>
+  </div>
+  <div class="products-grid">
+    {% for product in products %}
+    <div class="product-card" data-name="{{ product.name|lower }}" data-cat="{{ category }}">
+      <div class="product-emoji">
+        {% if 'non' in product.name|lower or 'bread' in product.name|lower %}🍞
+        {% elif 'tuxum' in product.name|lower %}🥚
+        {% elif 'sut' in product.name|lower or 'qatiq' in product.name|lower %}🥛
+        {% elif 'go\'sht' in product.name|lower or 'мясо' in product.name|lower %}🥩
+        {% elif 'sabzi' in product.name|lower or 'карто' in product.name|lower %}🥕
+        {% elif 'yog\'' in product.name|lower or 'масло' in product.name|lower %}🧈
+        {% elif 'shakar' in product.name|lower or 'сахар' in product.name|lower %}🍚
+        {% elif 'guruch' in product.name|lower or 'рис' in product.name|lower %}🌾
+        {% elif 'чой' in product.name or 'tea' in product.name|lower %}🍵
+        {% elif 'qahva' in product.name|lower or 'кофе' in product.name|lower %}☕
+        {% else %}🥗{% endif %}
+      </div>
+      <div class="product-info">
+        <div class="product-name">{{ product.name }}</div>
+        <span class="product-unit">
+          {% if product.splittable == 'Дона' %}dona{% elif product.splittable == 'Грамм' %}vazn{% else %}paket{% endif %}
+        </span>
+      </div>
+      <div class="product-right">
+        <div class="product-price">
+          {{ product.somoni }}с{% if product.diram %}.{{ '%02d'|format(product.diram) }}{% endif %}
+        </div>
+        <button class="add-btn" onclick="addToCart(event,'{{ product.name }}',{{ product.somoni + product.diram/100 }})">+</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<!-- WhatsApp -->
+<div class="wa-section">
+  <div class="wa-icon">📱</div>
+  <div class="wa-title">WhatsApp orqali buyurtma</div>
+  <div class="wa-sub">Savollaringiz bormi? To'g'ridan-to'g'ri yozing!</div>
+  <a href="https://wa.me/992909885383" target="_blank" class="wa-btn">
+    💬 WhatsApp'da ochish
+  </a>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<div class="toast" id="toast"></div>
 <script>
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+function addToCart(e, name, price) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  btn.style.transform = 'rotateX(20deg) scale(0.85)';
+  setTimeout(() => btn.style.transform = '', 300);
+
+  fetch('/api/cart/add', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, qty: 1, unit: 'paket', price_total: price })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success) {
+      showToast('✅ ' + name + ' savatga qo\'shildi!');
+      updateCartCount();
+    }
+  });
 }
 
-function addToCart(name, price) {
-    let qty = 1;
-    let unit = 'пакет';
-    if (name.includes('дона')) { qty = 1; unit = 'дона'; }
+function showCat(cat, btn) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cat-section').forEach(s => {
+    if(cat === 'all' || s.dataset.cat === cat) {
+      s.classList.add('visible');
+    } else {
+      s.classList.remove('visible');
+    }
+  });
+}
 
-    fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ name, qty, unit, price_total: price })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showToast('✅ ' + name + ' savatga qo\'shildi!');
-            updateCartCount();
-        }
-    });
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
+  });
+  if(q) {
+    document.querySelectorAll('.cat-section').forEach(s => s.classList.add('visible'));
+  }
 }
 </script>
 {% endblock %}
