@@ -11,13 +11,42 @@ from functools import wraps
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 
 # === CONFIG IMPORT ===
-from config import SHEETS_URL, SECRET_KEY, ADMIN_PASSWORD
+from config import SHEETS_URL, SECRET_KEY, ADMIN_PASSWORD, GREEN_API_INSTANCE_ID, GREEN_API_TOKEN, ADMIN_PHONE
 from whatsapp_config import WEBHOOK_VERIFY_TOKEN
 from whatsapp_flows import whatsapp_bot
 
 # === LOGGING ===
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def notify_admin_whatsapp(order_number, name, phone, address, items_text, total):
+    """Adminga WhatsApp orqali yangi zakaz haqida xabar yuborish"""
+    if not GREEN_API_TOKEN:
+        logger.warning("GREEN_API_TOKEN yo'q — WhatsApp xabar yuborilmadi")
+        return
+    try:
+        msg = (
+            f"🛒 *YANGI WEB ZAKAZ!*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"📦 #{order_number}\n"
+            f"👤 {name}\n"
+            f"📱 +{phone}\n"
+            f"📍 {address}\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"{items_text}\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"💰 Jami: *{total} so'm*\n"
+            f"🌐 Manba: Sayt (zargo-shop.onrender.com)"
+        )
+        url = f"https://api.green-api.com/waInstance{GREEN_API_INSTANCE_ID}/sendMessage/{GREEN_API_TOKEN}"
+        requests.post(url, json={
+            "chatId": f"{ADMIN_PHONE}@c.us",
+            "message": msg
+        }, timeout=10)
+        logger.info(f"Admin WhatsApp xabari yuborildi: #{order_number}")
+    except Exception as e:
+        logger.error(f"WhatsApp xabar xatosi: {e}")
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -143,6 +172,9 @@ def checkout():
                 'address': address
             }
         })
+
+        # Adminga WhatsApp xabar yuborish
+        notify_admin_whatsapp(order_number, name, phone_digits, address, items_text, total)
 
         session.pop('cart', None)
 
