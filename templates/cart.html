@@ -1,90 +1,141 @@
 {% extends "base.html" %}
+{% block title %}Savat — Zargo Shop{% endblock %}
 
-{% block title %}Savat - Zargo Shop{% endblock %}
+{% block extra_css %}
+<style>
+.page-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px;
+}
+.page-header h1 { font-size: 24px; font-weight: 700; }
+
+.cart-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+}
+.cart-item:last-of-type { border-bottom: none; }
+.cart-item-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--green-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+}
+.cart-item-info { flex: 1; }
+.cart-item-name { font-weight: 600; font-size: 15px; }
+.cart-item-qty { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.cart-item-price { font-weight: 700; font-size: 16px; color: var(--green); margin-right: 12px; }
+.cart-item-del {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: #fff0f0; border: none; color: var(--red);
+    font-size: 16px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+}
+.cart-item-del:hover { background: var(--red); color: white; }
+
+.cart-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 0 4px;
+    border-top: 2px solid var(--border);
+    margin-top: 8px;
+}
+.cart-total-label { font-size: 16px; font-weight: 600; }
+.cart-total-amount { font-size: 24px; font-weight: 700; color: var(--green); }
+
+.delivery-note {
+    background: var(--green-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px; color: var(--green);
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 16px; font-weight: 500;
+}
+
+.cart-actions { display: flex; gap: 12px; margin-top: 20px; }
+
+.empty-cart {
+    text-align: center; padding: 60px 20px;
+}
+.empty-cart-icon { font-size: 64px; margin-bottom: 16px; }
+.empty-cart h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.empty-cart p { color: var(--muted); margin-bottom: 24px; }
+
+@media (max-width: 500px) {
+    .cart-actions { flex-direction: column; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<h1 style="margin-bottom: 20px;">🛒 Savat</h1>
+<div class="page-header">
+    <a href="/" style="color:var(--muted);text-decoration:none;font-size:22px;">‹</a>
+    <h1>🛒 Savat</h1>
+</div>
 
 {% if cart %}
-<table style="width: 100%; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-    <thead style="background: #2c5530; color: white;">
-        <tr>
-            <th style="padding: 15px; text-align: left;">Mahsulot</th>
-            <th style="padding: 15px; text-align: center;">Miqdor</th>
-            <th style="padding: 15px; text-align: right;">Narx</th>
-            <th style="padding: 15px; text-align: center;">O'chirish</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in cart %}
-        <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 15px;">{{ item.name }}</td>
-            <td style="padding: 15px; text-align: center;">{{ item.qty }} {{ item.unit }}</td>
-            <td style="padding: 15px; text-align: right; font-weight: bold;">{{ item.price_total }}с</td>
-            <td style="padding: 15px; text-align: center;">
-                <button class="btn btn-danger btn-small" onclick="removeFromCart('{{ item.name }}')">🗑️</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    <tfoot style="background: #f5f5f5; font-weight: bold;">
-        <tr>
-            <td style="padding: 15px;" colspan="2">Jami:</td>
-            <td style="padding: 15px; text-align: right; color: #2c5530; font-size: 18px;">{{ total }}с</td>
-            <td></td>
-        </tr>
-    </tfoot>
-</table>
-
-<div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
-    <button class="btn btn-danger" onclick="clearCart()">🗑️ Savatni tozalash</button>
-    
-    {% if total >= 100 %}
-    <a href="/checkout" class="btn" style="text-decoration: none;">✅ Buyurtma berish</a>
-    {% else %}
-    <div style="color: #c62828; font-weight: bold;">
-        ⚠️ Eng kam buyurtma: 100с (hali {{ 100 - total }}с yetmaydi)
+<div class="card">
+    {% for item in cart %}
+    <div class="cart-item">
+        <div class="cart-item-icon">
+            {% set n = item.name %}
+            {% if 'Нон' in n %}🍞{% elif 'Тухум' in n %}🥚{% elif 'Сут' in n %}🥛
+            {% elif 'Гўшт' in n %}🥩{% elif 'Товуқ' in n %}🍗{% elif 'Картошка' in n %}🥔
+            {% elif 'Помидор' in n %}🍅{% elif 'Бодринг' in n %}🥒{% elif 'Гуруч' in n %}🍚
+            {% elif 'Шакар' in n %}🍬{% elif 'Туз' in n %}🧂{% elif 'Макарон' in n %}🍝
+            {% else %}🛒{% endif %}
+        </div>
+        <div class="cart-item-info">
+            <div class="cart-item-name">{{ item.name }}</div>
+            <div class="cart-item-qty">{{ item.qty }} {{ item.unit }}</div>
+        </div>
+        <div class="cart-item-price">{{ item.price_total }}с</div>
+        <button class="cart-item-del" onclick="removeItem('{{ item.name }}')" title="O'chirish">🗑</button>
     </div>
+    {% endfor %}
+
+    <div class="cart-total-row">
+        <span class="cart-total-label">Jami:</span>
+        <span class="cart-total-amount">{{ total }}с</span>
+    </div>
+</div>
+
+<div class="delivery-note">
+    🚚 {% if total >= 100 %}Yetkazish <strong>bepul!</strong>
+    {% else %}Bepul yetkazish uchun yana <strong>{{ 100 - total }}с</strong> qo'shing{% endif %}
+</div>
+
+<div class="cart-actions">
+    <button class="btn btn-danger btn-outline" onclick="clearCart()" style="background:transparent;border:2px solid var(--red);color:var(--red);">
+        🗑 Tozalash
+    </button>
+    {% if total >= 100 %}
+    <a href="/checkout" class="btn btn-full">✅ Buyurtma berish — {{ total }}с</a>
+    {% else %}
+    <a href="/" class="btn btn-full">+ Yana qo'shish</a>
     {% endif %}
 </div>
 
 {% else %}
-<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 10px;">
-    <h2 style="color: #666; margin-bottom: 20px;">Savat bo'sh</h2>
-    <p style="color: #999; margin-bottom: 30px;">Mahsulotlarni qo'shish uchun bosh sahifaga o'ting</p>
-    <a href="/" class="btn">🛒 Xarid qilish</a>
+<div class="empty-cart">
+    <div class="empty-cart-icon">🛒</div>
+    <h2>Savat bo'sh</h2>
+    <p>Hali hech narsa qo'shilmagan</p>
+    <a href="/" class="btn">Xarid qilish →</a>
 </div>
 {% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function removeFromCart(name) {
-    if (!confirm('Savatdan o\'chirishni xohlaysizmi?')) return;
-    
+function removeItem(name) {
     fetch('/api/cart/remove', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name: name})
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name})
+    }).then(r=>r.json()).then(d=>{ if(d.success) location.reload(); });
 }
-
 function clearCart() {
-    if (!confirm('Savatni butunlay tozalashni xohlaysizmi?')) return;
-    
-    fetch('/api/cart/clear', {method: 'POST'})
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
+    fetch('/api/cart/clear', {method:'POST'})
+    .then(r=>r.json()).then(d=>{ if(d.success) location.reload(); });
 }
 </script>
 {% endblock %}

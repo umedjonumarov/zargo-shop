@@ -1,56 +1,101 @@
 {% extends "base.html" %}
+{% block title %}Buyurtma tasdiqlandi — Zargo Shop{% endblock %}
 
-{% block title %}Buyurtma tasdiqlandi - Zargo Shop{% endblock %}
+{% block extra_css %}
+<style>
+.success-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+}
+.success-icon {
+    width: 90px; height: 90px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    margin: 0 auto 20px;
+}
+.order-number {
+    font-size: 48px; font-weight: 800;
+    color: var(--green); letter-spacing: -2px;
+    margin-bottom: 8px;
+}
+.success-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.success-subtitle { color: var(--muted); font-size: 15px; margin-bottom: 28px; line-height: 1.5; }
+
+.order-info {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    text-align: left;
+    margin-bottom: 20px;
+}
+.order-info-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+.order-info-row:last-child { border-bottom: none; }
+.order-info-row .icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+.order-info-row .label { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+.order-info-row .value { font-weight: 600; }
+
+.delivery-info {
+    background: var(--green-light);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex; gap: 12px; align-items: center;
+    text-align: left; font-size: 14px;
+}
+.delivery-info-icon { font-size: 28px; }
+
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
-    
-    <h1 style="color: #2c5530; margin-bottom: 15px;">Buyurtma qabul qilindi!</h1>
-    
-    <div style="font-size: 48px; font-weight: bold; color: #2c5530; margin-bottom: 10px;">
-        #{{ order_number }}
-    </div>
-    
-    <p style="color: #666; margin-bottom: 30px; font-size: 18px;">
-        Buyurtmangiz muvaffaqiyatli qabul qilindi. Tez orada siz bilan bog'lanamiz.
-    </p>
-    
-    <div style="background: #f5f5f5; border-radius: 10px; padding: 25px; max-width: 500px; margin: 0 auto 30px; text-align: left;">
-        <h3 style="margin-bottom: 15px; color: #333;">📋 Buyurtma ma'lumotlari:</h3>
-        
-        <div style="margin-bottom: 10px;">
-            <strong>👤 Ism:</strong> {{ name }}
+<div class="success-wrap">
+    <div class="success-icon">🎉</div>
+    <div class="order-number">#{{ order_number }}</div>
+    <div class="success-title">Buyurtma qabul qilindi!</div>
+    <div class="success-subtitle">Tez orada siz bilan bog'lanamiz va yetkazib beramiz.</div>
+
+    <div class="order-info">
+        <div class="order-info-row">
+            <div class="icon">👤</div>
+            <div><div class="label">Ism</div><div class="value">{{ name }}</div></div>
         </div>
-        
-        <div style="margin-bottom: 10px;">
-            <strong>📱 Telefon:</strong> {{ phone }}
+        <div class="order-info-row">
+            <div class="icon">📱</div>
+            <div><div class="label">Telefon</div><div class="value">{{ phone }}</div></div>
         </div>
-        
-        <div style="margin-bottom: 10px;">
-            <strong>📍 Manzil:</strong> {{ address }}
+        <div class="order-info-row">
+            <div class="icon">📍</div>
+            <div><div class="label">Manzil</div><div class="value">{{ address }}</div></div>
         </div>
-        
-        <div style="margin-bottom: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-            <strong>💰 Jami:</strong> <span style="color: #2c5530; font-size: 20px; font-weight: bold;">{{ total }}с</span>
+        <div class="order-info-row">
+            <div class="icon">💰</div>
+            <div><div class="label">Jami summa</div><div class="value" style="color:var(--green);font-size:18px;">{{ total }}с</div></div>
         </div>
     </div>
-    
-    <div style="margin-bottom: 30px; padding: 15px; background: #e8f5e9; border-radius: 10px; color: #2c5530;">
-        <strong>📞 Yetkazish vaqti:</strong> 30-60 daqiqa ichida<br>
-        <strong>💳 To'lov usuli:</strong> Naqd pul (yetkazib berganda)
+
+    <div class="delivery-info">
+        <div class="delivery-info-icon">🚚</div>
+        <div>
+            <div style="font-weight:600;margin-bottom:3px;">30–60 daqiqa ichida yetkazamiz</div>
+            <div style="color:var(--muted);">To'lov: naqd pul, yetkazib berganda</div>
+        </div>
     </div>
-    
-    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-        <a href="/" class="btn" style="text-decoration: none;">🛒 Yana xarid qilish</a>
-        <a href="https://wa.me/79099885383"
-           class="btn" style="text-decoration: none; background: #25d366;">
+
+    <div class="action-btns">
+        <a href="/" class="btn btn-full">🛒 Yana xarid qilish</a>
+        <a href="https://wa.me/79099885383" class="btn btn-full" style="background:#25d366;">
             💬 WhatsApp orqali bog'lanish
         </a>
     </div>
-
-    <p style="margin-top: 25px; color: #999; font-size: 13px;">
-        Buyurtma statusini kuzatish uchun WhatsApp'ga yozing yoki telefon orqali bog'laning.
-    </p>
 </div>
 {% endblock %}

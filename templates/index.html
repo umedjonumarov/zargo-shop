@@ -1,114 +1,201 @@
 {% extends "base.html" %}
-
-{% block title %}Bosh sahifa - Zargo Shop{% endblock %}
-
-{% block content %}
-<h1 style="text-align: center; margin-bottom: 10px;">🥬 Zargo Shop</h1>
-<p style="text-align: center; color: #666; margin-bottom: 30px;">
-    Zarzamin qishlog'iga yetkazib berish xizmati | 
-    <strong>100 сомонидан bepul</strong>
-</p>
-
-<div class="categories">
-    {% for category, products in categories.items() %}
-    <div class="category-card">
-        <h2>
-            {% if category == 'Нонушта' %}🍳{% endif %}
-            {% if category == 'Кунлик' %}🥦{% endif %}
-            {% if category == 'Узоқ муддат' %}🥫{% endif %}
-            {{ category }}
-        </h2>
-        <ul class="product-list">
-            {% for product in products %}
-            <li class="product-item">
-                <div>
-                    <div class="product-name">{{ product.name }}</div>
-                    <div style="font-size: 12px; color: #666;">
-                        {% if product.splittable == 'Дона' %}
-                            [дона билан]
-                        {% elif product.splittable == 'Грамм' %}
-                            [вес билан]
-                        {% else %}
-                            [пакет]
-                        {% endif %}
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="product-price">
-                        {{ product.somoni }}с
-                        {% if product.diram %}{{ product.diram }}дирам{% endif %}
-                    </div>
-                    <button class="btn btn-small" onclick="addToCart('{{ product.name }}', {{ product.somoni + product.diram/100 }})">
-                        + Savatga
-                    </button>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endfor %}
-</div>
-
-<div style="text-align: center; margin-top: 40px; padding: 20px; background: white; border-radius: 10px;">
-    <h3>📱 WhatsApp orqali buyurtma</h3>
-    <p>Telefon orqali buyurtma berishni xohlaysizmi?</p>
-    <a href="https://wa.me/9929099885383" class="btn" style="display: inline-block; margin-top: 10px; text-decoration: none;">
-        WhatsApp'ga o'tish
-    </a>
-</div>
-{% endblock %}
+{% block title %}Zargo Shop — Zarzamin yetkazib berish{% endblock %}
 
 {% block extra_css %}
 <style>
-.toast {
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #2c5530;
+.hero {
+    background: linear-gradient(135deg, var(--green) 0%, #2d9e47 100%);
+    border-radius: var(--radius);
+    padding: 32px 28px;
     color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
 }
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+.hero::before {
+    content: '🥬';
+    position: absolute; right: 20px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 80px; opacity: 0.15;
+}
+.hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.hero p { opacity: 0.88; font-size: 15px; line-height: 1.5; }
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 14px; border-radius: 50px;
+    font-size: 13px; font-weight: 600; margin-top: 14px;
+}
+
+.section-title {
+    font-size: 18px; font-weight: 700;
+    margin: 28px 0 14px;
+    display: flex; align-items: center; gap: 8px;
+}
+.section-title span { font-size: 22px; }
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+.product-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 16px 14px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    display: flex; flex-direction: column;
+}
+.product-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.product-emoji { font-size: 36px; margin-bottom: 10px; }
+.product-name { font-size: 14px; font-weight: 600; flex: 1; margin-bottom: 4px; line-height: 1.3; }
+.product-unit { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.product-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+.product-price { font-size: 16px; font-weight: 700; color: var(--green); }
+.add-btn {
+    width: 32px; height: 32px;
+    background: var(--green); color: white;
+    border: none; border-radius: 8px;
+    font-size: 20px; line-height: 1;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+}
+.add-btn:hover { background: var(--green-dark); transform: scale(1.1); }
+.add-btn.added { background: #ff6b35; }
+
+/* Toast */
+.toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1c1c2e; color: white;
+    padding: 13px 22px; border-radius: 50px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 9999; opacity: 0;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.whatsapp-banner {
+    background: #25d366;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 32px; text-decoration: none; color: white;
+    transition: opacity 0.2s;
+}
+.whatsapp-banner:hover { opacity: 0.92; }
+.whatsapp-banner-icon { font-size: 40px; }
+.whatsapp-banner h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.whatsapp-banner p { font-size: 13px; opacity: 0.88; }
+.whatsapp-banner-arrow { margin-left: auto; font-size: 22px; }
+
+@media (max-width: 480px) {
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 22px; }
 }
 </style>
 {% endblock %}
 
-{% block extra_js %}
+{% block content %}
+<!-- Hero -->
+<div class="hero">
+    <h1>🥬 Zargo Do'koni</h1>
+    <p>Zarzamin qishlog'iga toza mahsulotlar<br>yetkazib berish xizmati</p>
+    <div class="hero-badge">🚚 100с dan bepul yetkazish</div>
+</div>
+
+<!-- Mahsulotlar -->
+{% for category, products in categories.items() %}
+<div class="section-title">
+    <span>
+        {% if 'Нонушта' in category %}🍳
+        {% elif 'Кунлик' in category %}🥦
+        {% elif 'Узоқ' in category %}🥫
+        {% else %}🛒{% endif %}
+    </span>
+    {{ category }}
+</div>
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-emoji">
+            {% set n = product.name %}
+            {% if 'Нон' in n %}🍞
+            {% elif 'Тухум' in n %}🥚
+            {% elif 'Сут' in n %}🥛
+            {% elif 'Сариқ ёғ' in n or 'Масло' in n %}🧈
+            {% elif 'Қаймоқ' in n %}🫙
+            {% elif 'Гўшт' in n %}🥩
+            {% elif 'Товуқ' in n %}🍗
+            {% elif 'Картошка' in n %}🥔
+            {% elif 'Помидор' in n %}🍅
+            {% elif 'Бодринг' in n %}🥒
+            {% elif 'Гуруч' in n %}🍚
+            {% elif 'Шакар' in n %}🍬
+            {% elif 'Туз' in n %}🧂
+            {% elif 'Макарон' in n %}🍝
+            {% elif 'Ёғ' in n %}🫙
+            {% else %}🛒{% endif %}
+        </div>
+        <div class="product-name">{{ product.name }}</div>
+        <div class="product-unit">
+            {% if product.splittable == 'Дона' %}dona bilan
+            {% elif product.splittable == 'Грамм' %}vazn bilan
+            {% else %}paket{% endif %}
+        </div>
+        <div class="product-bottom">
+            <div class="product-price">
+                {{ product.somoni }}с{% if product.diram %}<span style="font-size:12px;font-weight:500"> {{ product.diram }}д</span>{% endif %}
+            </div>
+            <button class="add-btn" onclick="addToCart(this, '{{ product.name }}', {{ product.somoni + product.diram/100 }})">+</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+<!-- WhatsApp banner -->
+<a href="https://wa.me/79099885383" class="whatsapp-banner" target="_blank">
+    <div class="whatsapp-banner-icon">💬</div>
+    <div>
+        <h3>WhatsApp orqali buyurtma</h3>
+        <p>Yoki bevosita WhatsApp'ga yozing</p>
+    </div>
+    <div class="whatsapp-banner-arrow">›</div>
+</a>
+
 <div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
 function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-function addToCart(name, price) {
-    let qty = 1;
-    let unit = 'пакет';
-    if (name.includes('дона')) { qty = 1; unit = 'дона'; }
+function addToCart(btn, name, price) {
+    btn.textContent = '✓';
+    btn.classList.add('added');
+    setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 1200);
 
     fetch('/api/cart/add', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ name, qty, unit, price_total: price })
+        body: JSON.stringify({ name, qty: 1, unit: 'ta', price_total: price })
     })
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showToast('✅ ' + name + ' savatga qo\'shildi!');
-            updateCartCount();
+            showToast('✅ ' + name + ' savatga qo\'shildi');
+            updateCartBadge();
         }
     });
 }
