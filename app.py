@@ -283,6 +283,25 @@ def whatsapp_webhook():
         return jsonify({'status': 'error'}), 500
 
 
+# ─── Debug: Sheets ulanishini tekshirish ─────────────────────────────────────
+
+@app.route('/admin/test-sheets')
+@admin_required
+def test_sheets():
+    import requests as req
+    from config import SHEETS_URL
+    try:
+        r = req.get(SHEETS_URL, params={'action': 'products'}, timeout=20, allow_redirects=True)
+        return jsonify({
+            'status_code': r.status_code,
+            'url': r.url,
+            'body_length': len(r.text),
+            'body_preview': r.text[:500],
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
 # ─── Bosh sahifa yo'naltirish ─────────────────────────────────────────────────
 
 @app.route('/')
