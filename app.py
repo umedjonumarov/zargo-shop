@@ -11,7 +11,7 @@ from flask import (
     redirect, url_for, session, flash
 )
 
-from config import SECRET_KEY, ADMIN_PASSWORD, META_VERIFY_TOKEN, SHOP_URL, MIN_ORDER, CURRENCY, PORT
+from config import SECRET_KEY, ADMIN_PASSWORD, GREEN_VERIFY_TOKEN, SHOP_URL, MIN_ORDER, CURRENCY, PORT
 from database import db
 from ai_agent import handle_message
 from whatsapp_meta import notify_admin
@@ -234,45 +234,46 @@ def admin_delete_order(number):
 
 @app.route('/webhook/whatsapp', methods=['GET', 'POST'])
 def whatsapp_webhook():
+    """Green API webhook"""
     if request.method == 'GET':
-        verify_token = request.args.get('hub.verify_token', '')
-        challenge    = request.args.get('hub.challenge', '')
-        if verify_token == META_VERIFY_TOKEN:
-            return challenge, 200
+        # Green API webhook tekshiruvi
+        token = request.args.get('token', '')
+        if token == GREEN_VERIFY_TOKEN:
+            return 'OK', 200
         return 'Unauthorized', 403
 
     try:
         data = request.get_json(silent=True) or {}
-        if data.get('object') != 'whatsapp_business_account':
+        webhook_type = data.get('typeWebhook', '')
+
+        # Faqat kiruvchi matnli xabarlarni qayta ishlash
+        if webhook_type != 'incomingMessageReceived':
             return jsonify({'status': 'ignored'}), 200
 
-        entry   = (data.get('entry') or [{}])[0]
-        changes = (entry.get('changes') or [{}])[0]
-        value   = changes.get('value', {})
-        messages = value.get('messages', [])
+        sender_data  = data.get('senderData', {})
+        message_data = data.get('messageData', {})
 
-        if not messages:
-            return jsonify({'status': 'no_message'}), 200
+        # chatId formatidan raqamni ajratib olish: "992901234567@c.us" → "992901234567"
+        chat_id = sender_data.get('chatId', '')
+        sender  = chat_id.replace('@c.us', '').replace('@g.us', '')
 
-        message = messages[0]
-        sender  = message.get('from', '')
-        msg_type = message.get('type', '')
+        # Guruh xabarlarini o'tkazib yuborish
+        if '@g.us' in chat_id:
+            return jsonify({'status': 'group_ignored'}), 200
 
-        if msg_type == 'text':
-            text = message.get('text', {}).get('body', '').strip()
-        elif msg_type == 'interactive':
-            inter = message.get('interactive', {})
-            text = (
-                inter.get('button_reply', {}).get('title') or
-                inter.get('list_reply', {}).get('title') or ''
-            )
+        msg_type = message_data.get('typeMessage', '')
+
+        if msg_type == 'textMessage':
+            text = message_data.get('textMessageData', {}).get('textMessage', '').strip()
+        elif msg_type == 'extendedTextMessage':
+            text = message_data.get('extendedTextMessageData', {}).get('text', '').strip()
         else:
             text = ''
 
         if not text or not sender:
             return jsonify({'status': 'empty'}), 200
 
-        logger.info(f"WhatsApp: {sender} → {text[:80]}")
+        logger.info(f"WhatsApp [{sender}]: {text[:80]}")
         handle_message(sender, text)
         return jsonify({'status': 'ok'}), 200
 

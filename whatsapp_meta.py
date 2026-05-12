@@ -1,43 +1,32 @@
 """
-ZarGo Shop — Meta WhatsApp Business API
+ZarGo Shop — Green API (WhatsApp)
 Mijozlarga va adminga xabar yuborish.
 """
 import logging
 import requests
-from config import (
-    META_PHONE_NUMBER_ID, META_ACCESS_TOKEN,
-    META_API_VERSION, ADMIN_PHONE, CURRENCY
-)
+from config import GREEN_INSTANCE_ID, GREEN_API_TOKEN, ADMIN_PHONE, CURRENCY
 
 logger = logging.getLogger(__name__)
 
-_BASE = f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages"
-_HEADERS = lambda: {
-    "Authorization": f"Bearer {META_ACCESS_TOKEN}",
-    "Content-Type": "application/json",
-}
+
+def _url(method: str) -> str:
+    return f"https://api.green-api.com/waInstance{GREEN_INSTANCE_ID}/{method}/{GREEN_API_TOKEN}"
 
 
 def send_text(phone: str, text: str) -> bool:
-    """Oddiy matn xabar yuborish"""
-    if not META_ACCESS_TOKEN or not META_PHONE_NUMBER_ID:
-        logger.warning("Meta API credentials yo'q")
+    """Xabar yuborish. phone = '992901234567' (+ belgisisiz)"""
+    if not GREEN_INSTANCE_ID or not GREEN_API_TOKEN:
+        logger.warning("Green API credentials yo'q")
         return False
     try:
         r = requests.post(
-            _BASE,
-            headers=_HEADERS(),
-            json={
-                "messaging_product": "whatsapp",
-                "to": phone,
-                "type": "text",
-                "text": {"body": text, "preview_url": False},
-            },
+            _url("sendMessage"),
+            json={"chatId": f"{phone}@c.us", "message": text},
             timeout=10,
         )
         if r.status_code == 200:
             return True
-        logger.error(f"Meta API {r.status_code}: {r.text}")
+        logger.error(f"Green API {r.status_code}: {r.text}")
         return False
     except Exception as e:
         logger.error(f"send_text xatosi: {e}")
@@ -47,7 +36,7 @@ def send_text(phone: str, text: str) -> bool:
 def notify_admin(order_number, name, phone, address, items_text, total):
     """Adminga yangi buyurtma haqida xabar"""
     msg = (
-        f"🛒 *ЯНГИ БУЮРТМА!*\n"
+        f"🛒 *YANGI BUYURTMA!*\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"📦 #{order_number}\n"
         f"👤 {name}\n"
@@ -56,7 +45,7 @@ def notify_admin(order_number, name, phone, address, items_text, total):
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"{items_text}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"💰 Жами: *{total}{CURRENCY}*"
+        f"💰 Jami: *{total}{CURRENCY}*"
     )
     return send_text(ADMIN_PHONE, msg)
 

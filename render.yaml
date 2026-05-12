@@ -13,11 +13,11 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-4o-mini
-      - key: META_PHONE_NUMBER_ID
+      - key: GREEN_INSTANCE_ID
         sync: false
-      - key: META_ACCESS_TOKEN
+      - key: GREEN_API_TOKEN
         sync: false
-      - key: META_VERIFY_TOKEN
+      - key: GREEN_VERIFY_TOKEN
         value: zargo_verify_2024
       - key: ADMIN_PHONE
         value: "992927909698"
