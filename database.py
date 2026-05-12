@@ -19,7 +19,11 @@ class SheetsDB:
             if not r.text.strip():
                 logger.error(f"Sheets GET [{action}]: empty response (status {r.status_code})")
                 return {}
-            return r.json()
+            try:
+                return r.json()
+            except Exception:
+                logger.error(f"Sheets GET [{action}]: status={r.status_code} body={r.text[:300]}")
+                return {}
         except Exception as e:
             logger.error(f"Sheets GET [{action}]: {e}")
             return {}
