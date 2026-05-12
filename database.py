@@ -15,7 +15,10 @@ class SheetsDB:
     def _get(self, action, **params):
         try:
             params['action'] = action
-            r = requests.get(self.url, params=params, timeout=15)
+            r = requests.get(self.url, params=params, timeout=20, allow_redirects=True)
+            if not r.text.strip():
+                logger.error(f"Sheets GET [{action}]: empty response (status {r.status_code})")
+                return {}
             return r.json()
         except Exception as e:
             logger.error(f"Sheets GET [{action}]: {e}")

@@ -27,7 +27,7 @@ MAX_HISTORY = 20
 
 def _session(phone: str) -> dict:
     if phone not in _sessions:
-        _sessions[phone] = {'history': [], 'greeted_today': None, 'customer': None}
+        _sessions[phone] = {'history': [], 'greeted_today': None, 'customer': None, 'db_checked': False}
     return _sessions[phone]
 
 
@@ -113,7 +113,8 @@ def _run_tool(phone: str, name: str, args: dict) -> str:
         language = args.get("language", "uz")
         cname    = args.get("name", "")
         db.save_customer(phone, cname, gender, language)
-        sess["customer"] = {"name": cname, "gender": gender, "language": language}
+        sess["customer"]   = {"name": cname, "gender": gender, "language": language}
+        sess["db_checked"] = True
         return f"Mijoz ro'yxatga olindi: {cname} ({gender}, {language})"
 
     if name == "get_products":
@@ -231,10 +232,12 @@ def handle_message(phone: str, text: str, msg_id: str = "") -> None:
     sess     = _session(phone)
     customer = sess.get("customer")
 
-    # Har safar DBdan yangilash (Render restart bo'lsa ham ishlaydi)
-    if customer is None:
+    # DBdan bir marta yuklash (session yangi bo'lsa)
+    if customer is None and not sess.get("db_checked"):
+        sess["db_checked"] = True
         customer = db.get_customer(phone)
-        sess["customer"] = customer
+        if customer:
+            sess["customer"] = customer
 
     # Tarix ga foydalanuvchi xabarini qo'sh
     sess["history"].append({"role": "user", "content": text})
