@@ -3,13 +3,25 @@ services:
     name: zargo-shop
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 60
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: ADMIN_PASSWORD
         value: zargo123
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: META_PHONE_NUMBER_ID
+        sync: false
+      - key: META_ACCESS_TOKEN
+        sync: false
+      - key: META_VERIFY_TOKEN
+        value: zargo_verify_2024
+      - key: ADMIN_PHONE
+        value: "992927909698"
       - key: SHEETS_URL
-        value: https://script.google.com/macros/s/AKfycbziUIX313Iw8gkdwnIXtjJROIBSN12vvIanzLVcxugQXb_eJFOXj0mrMqRzHLo3WAdXGQ/exec
-      - key: PORT
-        value: "10000"
+        value: https://script.google.com/macros/s/AKfycbzjYrGtarRC-t8B2VQZQblamP3aocIL1vBEMt-nypuHu9BAV2AyQpi-mIBQFOVJ_Hso/exec
+      - key: SHOP_URL
+        sync: false

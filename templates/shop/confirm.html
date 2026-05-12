@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}ZarGo — Buyurtma tasdiqlandi{% endblock %}
+
+{% block ecss %}
+.confirm-wrap{text-align:center;padding:30px 0 20px;animation:popIn .5s cubic-bezier(.17,.67,.32,1.4)}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+.confirm-icon{
+  width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),#009970);
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;margin:0 auto 20px;
+  box-shadow:0 0 40px rgba(0,200,150,.4),0 0 80px rgba(0,200,150,.2);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{box-shadow:0 0 40px rgba(0,200,150,.4),0 0 80px rgba(0,200,150,.2)}
+  50%{box-shadow:0 0 60px rgba(0,200,150,.7),0 0 120px rgba(0,200,150,.3)}
+}
+.confirm-title{font-size:24px;font-weight:800;color:var(--green);margin-bottom:6px}
+.confirm-sub{font-size:14px;color:var(--dim);margin-bottom:28px}
+.order-card{background:var(--glass);border:1px solid var(--gb);border-radius:var(--r);padding:20px;margin-bottom:16px;text-align:left}
+.order-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--gb)}
+.order-row:last-child{border-bottom:none}
+.or-key{font-size:13px;color:var(--dim)}
+.or-val{font-size:14px;font-weight:600;text-align:right;max-width:60%}
+.order-number{font-size:32px;font-weight:900;color:var(--gold);text-align:center;margin:12px 0 4px}
+.delivery-badge{
+  background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);
+  border-radius:12px;padding:12px 14px;
+  font-size:13px;color:var(--green);
+  display:flex;align-items:center;gap:8px;margin-bottom:16px;
+}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;overflow:hidden}
+.confetti-piece{
+  position:absolute;top:-20px;border-radius:2px;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  to{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+{% endblock %}
+
+{% block content %}
+<div class="confetti" id="confetti"></div>
+
+<div class="confirm-wrap">
+  <div class="confirm-icon">✅</div>
+  <div class="confirm-title" data-i18n="order_accepted">Buyurtma qabul qilindi!</div>
+  <div class="confirm-sub" data-i18n="order_accepted_sub">Tez orada yetkazib beramiz</div>
+</div>
+
+<div class="order-card">
+  <div style="text-align:center;margin-bottom:12px">
+    <div style="font-size:12px;color:var(--dim)" data-i18n="order_number">Buyurtma raqami</div>
+    <div class="order-number">#{{ number }}</div>
+  </div>
+
+  {% if order %}
+  <div class="order-row">
+    <span class="or-key" data-i18n="customer_name">Ismi</span>
+    <span class="or-val">{{ order.name }}</span>
+  </div>
+  <div class="order-row">
+    <span class="or-key" data-i18n="address">Manzil</span>
+    <span class="or-val">{{ order.address }}</span>
+  </div>
+  <div class="order-row">
+    <span class="or-key" data-i18n="total">Jami</span>
+    <span class="or-val" style="color:var(--gold);font-size:18px;font-weight:800">{{ order.total|int }}с</span>
+  </div>
+  <div class="order-row">
+    <span class="or-key" data-i18n="payment">To'lov</span>
+    <span class="or-val">💵 <span data-i18n="cash">Naqd (yetkazilganda)</span></span>
+  </div>
+  {% endif %}
+</div>
+
+<div class="delivery-badge">
+  🚚 <span data-i18n="delivery_time">Yetkazib berish 30–60 daqiqa ichida</span>
+</div>
+
+<a href="/shop" class="btn btn-outline btn-full" style="margin-bottom:10px">
+  🛒 <span data-i18n="continue_shopping">Xarid davom ettirish</span>
+</a>
+
+<a href="https://wa.me/" class="btn btn-green btn-full" id="wa-link">
+  💬 <span data-i18n="back_to_bot">WhatsApp botga qaytish</span>
+</a>
+{% endblock %}
+
+{% block ejs %}
+<script>
+/* Confetti */
+(function(){
+  const c = document.getElementById('confetti');
+  const colors = ['#f4a700','#ffd700','#00c896','#ff4d6d','#ffffff','#a78bfa'];
+  for(let i=0;i<70;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    const size=6+Math.random()*10;
+    p.style.cssText=`
+      left:${Math.random()*100}%;
+      width:${size}px;height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*1}s;
+      opacity:${0.7+Math.random()*.3};
+    `;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.remove(), 4000);
+})();
+
+/* WA link */
+const phone = new URLSearchParams(window.location.search).get('phone')
+  || sessionStorage.getItem('wa_phone');
+if(phone) {
+  document.getElementById('wa-link').href = `https://wa.me/${phone}`;
+}
+</script>
+{% endblock %}
