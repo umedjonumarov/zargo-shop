@@ -18,8 +18,9 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # ─── Xotira (in-memory) ─────────────────────────────────────────────────────
 # { phone: { history: [...], greeted_today: date | None, customer: dict | None } }
 _sessions: dict = {}
+_processed_ids: set = set()   # ikki marta kelgan webhook xabarlarini bloklash
 
-MAX_HISTORY = 20  # GPT ga yuboriladigan maksimal xabar soni
+MAX_HISTORY = 20
 
 
 # ─── Yordamchi funksiyalar ───────────────────────────────────────────────────
@@ -150,27 +151,33 @@ def _build_system(phone: str, sess: dict) -> str:
 
     if is_new:
         greeting_rule = (
-            "Мижоз биринчи маротаба ёзмоқда. "
-            "Илиқ саломлаш (Ассалому алайкум!), ва исмини сўра."
+            "Мижоз биринчи маротаба ёзмоқда — базада топилмади. "
+            "Илиқ саломла (Ассалому алайкум!) ва ФАҚАТ БИРА МАРТА исмини сўра. "
+            "Мижоз исмини айтгандан кейин — register_customer чақир, "
+            "сўнг дарҳол хуш келибсиз деб ёрдам таклиф қил. "
+            "ИСМИНИ ҚАЙТА СўРАМА."
         )
     elif first_msg_today:
-        name   = customer["name"]
-        title  = _title(customer.get("gender", "unknown"))
+        name  = customer["name"]
+        title = _title(customer.get("gender", "unknown"))
         greeting_rule = (
-            f"Қайтиб келган мижоз. Қуйидагини айт: "
-            f"'Ассалому алайкум {name} {title}, ZarGo онлайн дўконида сизни қайта кўрганимиздан хурсандмиз! "
-            f"Сизга қандай ёрдам бера оламан?'"
+            f"Мижоз исми маълум: {name} ({title}). "
+            f"Айт: 'Ассалому алайкум {name} {title}, "
+            f"ZarGo онлайн дўконида сизни қайта кўрганимиздан хурсандмиз! "
+            f"Сизга қандай ёрдам бера оламан?' "
+            f"ҲЕЧ ҚАЧОН исмини қайта сўрама."
         )
     else:
-        name   = customer["name"]
-        title  = _title(customer.get("gender", "unknown"))
-        tw     = _time_word()
+        name  = customer["name"]
+        title = _title(customer.get("gender", "unknown"))
+        tw    = _time_word()
         greeting_rule = (
-            f"Мижоз ўша кун яна ёзди. Расмий салом ишлатма. "
-            f"Шунчаки: 'Хайрли {tw} {name} {title}!' де ва давом эт."
+            f"Мижоз исми маълум: {name} ({title}). ўша кун яна ёзди. "
+            f"Расмий салом ишлатма — шунчаки 'Хайрли {tw} {name} {title}!' де ва давом эт. "
+            f"ҲЕЧ ҚАЧОН исмини қайта сўрама."
         )
 
-    return f"""Сен ZarGo онлайн дўконининг AI ёрдамчисисан.
+    return f"""Сен ZarGo онлайн дўконининг AI ёрдамчисан.
 
 ТИЛ ҚОИДАСИ (МУҲИМ):
 - Мижоз рус тилида ёзса — ўзбек кирилида жавоб бер.
@@ -189,13 +196,17 @@ def _build_system(phone: str, sess: dict) -> str:
 
 САЛОМЛАШИШ ҚОИДАСИ: {greeting_rule}
 
-ЖИНС: Исмдан жинсни аниқла. Аёл → опа. Эркак → ака. Номаълум → ака.
+ЖИНС АНИҚЛАШ (МУҲИМ):
+ўзбек/Тожик исмлари бўйича:
+- Аёл исмлари (опа): Малика, Нилуфар, Зебо, Гулнора, Мадина, Замира, Шаҳло, Дилноза, Феруза, Барно, Мунира, Хурмо, Ойдин, Насиба, Лола, Шоира, Матлуба, Мухаббат, Нозима, Умида, Дилрабо, Хилола, Сабина, Камола, Ирода, Азиза, Латофат, Мафтуна, Ситора, Зулфия ва «а», «о», «е», «и» билан тугайдиган исмлар.
+- Эркак исмлари (ака): Умеджон, Баҳром, Санжар, Жавлон, Музаффар, Суҳроб, Фирдавс, Бобур, Алишер, Жасур, ўткир, Шерзод, Нодир, Зафар, Равшан, Дониёр, Комил, Рустам, Тимур, Акбар, Шухрат, Ойбек, Улугбек, Хуршид, «жон», «бек», «али», «хон», «зод» билан тугайдиган исмлар.
+- Номаълум бўлса — ака де.
 
 МУҲИМ ҚОИДАЛАР:
 • Мижозни рўйхатга олиш ёки базага сақлаш ҳақида ҲЕЧ ҚАЧОН айтма — бу ички жараён.
 • Мижоз исмини айтса — register_customer чақир, сўнг дарҳол саломлашиб, ёрдам таклиф қил.
 • Минимал буюртма: {MIN_ORDER}{CURRENCY}. Камроқ бўлса рад эт.
-• Ётказиб бериш: {DELIVERY_AREA} бўйича, {MIN_ORDER}{CURRENCY} дан юқори — бепул.
+• Йўтказиб бериш: {DELIVERY_AREA} бўйича, {MIN_ORDER}{CURRENCY} дан юқори — бепул.
 • Тўлов: фақат нақд (ётказилганда).
 
 МАҲСУЛОТ/БУЮРТМА:
@@ -208,11 +219,19 @@ def _build_system(phone: str, sess: dict) -> str:
 
 # ─── Asosiy xabarni qayta ishlash ────────────────────────────────────────────
 
-def handle_message(phone: str, text: str) -> None:
+def handle_message(phone: str, text: str, msg_id: str = "") -> None:
+    # Ikki marta kelgan xabarni bloklash
+    if msg_id:
+        if msg_id in _processed_ids:
+            return
+        _processed_ids.add(msg_id)
+        if len(_processed_ids) > 500:
+            _processed_ids.clear()
+
     sess     = _session(phone)
     customer = sess.get("customer")
 
-    # Agar sessiyada yo'q bo'lsa, DBdan qidir
+    # Har safar DBdan yangilash (Render restart bo'lsa ham ishlaydi)
     if customer is None:
         customer = db.get_customer(phone)
         sess["customer"] = customer
@@ -237,7 +256,7 @@ def handle_message(phone: str, text: str) -> None:
         )
     except Exception as e:
         logger.error(f"OpenAI xatosi: {e}")
-        send_text(phone, "Хatolик юз берди. Илтимос, бироздан сўнг қайта уриниб кўринг.")
+        send_text(phone, "Хатолик юз берди. Илтимос, бироздан сўнг қайта уриниб кўринг.")
         return
 
     msg = response.choices[0].message
@@ -270,7 +289,7 @@ def handle_message(phone: str, text: str) -> None:
             sess["history"].append({"role": "assistant", "content": final_text})
         except Exception as e:
             logger.error(f"OpenAI 2-chaqiruv xatosi: {e}")
-            final_text = "Хatolик юз берди."
+            final_text = "Хатолик юз берди."
     else:
         final_text = msg.content or ""
         sess["history"].append({"role": "assistant", "content": final_text})

@@ -273,8 +273,9 @@ def whatsapp_webhook():
         if not text or not sender:
             return jsonify({'status': 'empty'}), 200
 
+        msg_id = data.get('idMessage', '')
         logger.info(f"WhatsApp [{sender}]: {text[:80]}")
-        handle_message(sender, text)
+        handle_message(sender, text, msg_id)
         return jsonify({'status': 'ok'}), 200
 
     except Exception as e:
