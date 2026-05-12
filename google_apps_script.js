@@ -254,7 +254,8 @@ function getProducts() {
   const data   = sheet.getDataRange().getValues();
   const result = [];
   for (let i = 1; i < data.length; i++) {
-    if (!data[i][0] || data[i][7] === false || data[i][7] === 'false') continue;
+    const avail = String(data[i][7]).toLowerCase();
+    if (!data[i][0] || avail === 'false' || avail === 'нет' || avail === '') continue;
     result.push({
       id:          data[i][0],
       name:        data[i][1],
