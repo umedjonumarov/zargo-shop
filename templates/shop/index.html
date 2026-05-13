@@ -173,7 +173,7 @@ function openModal(idx, cat) {
   modalProduct = p;
   modalQty = 1;
   document.getElementById('m-name').textContent = p.name;
-  document.getElementById('m-price').textContent = p.price + 'с';
+  document.getElementById('m-price').textContent = fmtPrice(p.price) + 'с';
   updateModalTotal();
   document.getElementById('product-modal').classList.add('open');
 }
@@ -189,11 +189,15 @@ function changeQty(delta) {
   updateModalTotal();
 }
 
+function fmtPrice(v) {
+  return Number.isInteger(v) ? v : parseFloat(v.toFixed(2));
+}
 function updateModalTotal() {
   if(!modalProduct) return;
-  const total = (modalProduct.price * modalQty).toFixed(0);
+  const total = fmtPrice(modalProduct.price * modalQty);
+  const unit  = fmtPrice(modalProduct.price);
   document.getElementById('m-total').textContent =
-    `Жами: ${total}с (${modalQty} × ${modalProduct.price}с)`;
+    `Жами: ${total}с (${modalQty} × ${unit}с)`;
 }
 
 function addToCartFromModal() {
