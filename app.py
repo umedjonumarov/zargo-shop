@@ -23,6 +23,16 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
+
+@app.template_filter('price')
+def price_filter(value):
+    """1.5 → '1.5', 3.0 → '3', 4.5 → '4.5'"""
+    try:
+        v = float(value)
+        return str(int(v)) if v == int(v) else str(round(v, 2))
+    except (TypeError, ValueError):
+        return str(value)
+
 # Scheduler ishga tushirish (Render'da faqat bir worker bo'lganda)
 if os.environ.get('WERKZEUG_RUN_MAIN') != 'true' or not app.debug:
     _scheduler = start_scheduler()
