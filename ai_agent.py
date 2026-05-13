@@ -150,14 +150,25 @@ def _build_system(phone: str, sess: dict) -> str:
     is_new          = customer is None or not (customer.get("name") or "").strip()
     first_msg_today = (greeted_today != today)
 
+    history = sess.get("history", [])
+    prev_user_msgs = [m["content"] for m in history if m.get("role") == "user"]
+
     if is_new:
-        greeting_rule = (
-            "Мижоз биринчи маротаба ёзмоқда — базада топилмади. "
-            "Илиқ саломла (Ассалому алайкум!) ва ФАҚАТ БИРА МАРТА исмини сўра. "
-            "Мижоз исмини айтгандан кейин — register_customer чақир, "
-            "сўнг дарҳол хуш келибсиз деб ёрдам таклиф қил. "
-            "ИСМИНИ ҚАЙТА СўРАМА."
-        )
+        if prev_user_msgs:
+            greeting_rule = (
+                "Суҳбат тарихини кўриб чиқ — мижоз олдин исмини айтган бўлиши мумкин. "
+                "Агар тарихда исм топсанг — register_customer ни ДАРҲОл чақир ва ёрдам таклиф қил. "
+                "Исмини ҚАЙТА СЎРАМа. "
+                "Агар тарихда исм йўқ бўлса — фақат бир марта исмини сўра."
+            )
+        else:
+            greeting_rule = (
+                "Мижоз биринчи маротаба ёзмоқда. "
+                "Илиқ саломла (Ассалому алайкум!) ва ФАҚАТ БИР МАРТА исмини сўра. "
+                "Мижоз исмини айтгандан кейин — register_customer чақир, "
+                "сўнг дарҳол хуш келибсиз деб ёрдам таклиф қил. "
+                "ИСМИНИ ҚАЙТА СЎРАМА."
+            )
     elif first_msg_today:
         name  = customer["name"]
         title = _title(customer.get("gender", "unknown"))
@@ -204,8 +215,9 @@ def _build_system(phone: str, sess: dict) -> str:
 - Номаълум бўлса — ака де.
 
 МУҲИМ ҚОИДАЛАР:
-• Мижозни рўйхатга олиш ёки базага сақлаш ҳақида ҲЕЧ ҚАЧОН айтма — бу ички жараён.
-• Мижоз исмини айтса — register_customer чақир, сўнг дарҳол саломлашиб, ёрдам таклиф қил.
+• "рўйхатга оламан", "базага сақлайман", "тизимга киритаман" — бу сўзларни МУТЛАҚО ишлатма.
+• Мижоз исмини айтса — register_customer чақир, сўнг дарҳол ИСМИНИ АЙТИБ саломлашиб, ёрдам таклиф қил.
+• Суҳбат тарихида мижоз исми кўринса — register_customer ни ДАРҲОЛ чақир (қайта сўрама).
 • Минимал буюртма: {MIN_ORDER}{CURRENCY}. Камроқ бўлса рад эт.
 • Йўтказиб бериш: {DELIVERY_AREA} бўйича, {MIN_ORDER}{CURRENCY} дан юқори — бепул.
 • Тўлов: фақат нақд (ётказилганда).
@@ -236,7 +248,7 @@ def handle_message(phone: str, text: str, msg_id: str = "") -> None:
     if customer is None and not sess.get("db_checked"):
         sess["db_checked"] = True
         customer = db.get_customer(phone)
-        if customer:
+        if customer and (customer.get("name") or "").strip():
             sess["customer"] = customer
 
     # Tarix ga foydalanuvchi xabarini qo'sh
