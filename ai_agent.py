@@ -147,7 +147,7 @@ def _build_system(phone: str, sess: dict) -> str:
     customer        = sess.get("customer")
     greeted_today   = sess.get("greeted_today")
     today           = date.today()
-    is_new          = customer is None
+    is_new          = customer is None or not (customer.get("name") or "").strip()
     first_msg_today = (greeted_today != today)
 
     if is_new:
