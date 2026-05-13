@@ -23,9 +23,14 @@
     }
     .header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .logo{display:flex;align-items:center;gap:6px;text-decoration:none}
-    .logo-icon{font-size:26px}
+    .logo-img{height:36px;width:auto;object-fit:contain}
     .logo-text{font-size:22px;font-weight:800;color:var(--text)}
     .logo-text span{color:var(--gold)}
+    /* ── LANG ── */
+    .lang-switcher{display:flex;gap:4px;background:#f4f6f8;border-radius:20px;padding:3px}
+    .lang-btn{border:none;border-radius:16px;padding:3px 10px;font-size:11px;font-weight:700;
+      cursor:pointer;font-family:'Poppins',sans-serif;color:var(--dim);background:transparent;transition:all .2s}
+    .lang-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(0,0,0,.1)}
     .location-btn{
       display:flex;align-items:center;gap:5px;
       background:#f0f8f1;border:none;border-radius:20px;
@@ -275,14 +280,14 @@
 <header class="header">
   <div class="header-row">
     <a href="/shop" class="logo">
-      <span class="logo-icon">🥗</span>
-      <span class="logo-text">Zar<span>Go</span></span>
+      <img class="logo-img" src="/static/img/logo.png" alt="ZarGo"
+           onerror="this.outerHTML='<span class=\'logo-text\'>Zar<span>Go</span></span>'"/>
     </a>
-    <button class="location-btn">
-      📍 Zarzamin ▾
-    </button>
+    <div class="lang-switcher" id="lang-sw">
+      <button class="lang-btn active" onclick="setLang('uz',this)">UZ</button>
+      <button class="lang-btn" onclick="setLang('tj',this)">TJ</button>
+    </div>
     <div class="header-icons">
-      <button class="icon-btn">🔔</button>
       <a href="/shop/checkout" class="icon-btn" style="text-decoration:none;color:inherit">
         🛒
         <span class="cart-badge" id="cart-count">0</span>
@@ -374,7 +379,7 @@
 
 <!-- ── PROMO BANNERS ── -->
 <div class="sec-header" style="margin-top:8px">
-  <div class="sec-title">Maxsus takliflar</div>
+  <div class="sec-title special-title">Maxsus takliflar</div>
 </div>
 <div class="promo-grid">
   <div class="promo-card green">
@@ -566,6 +571,104 @@ document.getElementById('product-modal').addEventListener('click', function(e){
 
 // WA back link phone
 const urlPhone = new URLSearchParams(window.location.search).get('phone');
+
+// ── LANG ──────────────────────────────────────────────────────────────────
+const LANGS = {
+  uz: {
+    search_ph: 'Mahsulot yoki kategoriya qidiring...',
+    hero_title: 'Toza mahsulotlar\neshigingizgacha!',
+    hero_f1: '🚚 100с dan bepul yetkazish',
+    hero_f2: '🌿 Har kuni yangi va sifatli mahsulotlar',
+    hero_badge: 'Tez\nva ishonchli\nyetkazish',
+    add_btn: '+ Savatga',
+    added_btn: '✅ Qo\'shildi',
+    modal_add: '🛒 Savatga qo\'shish',
+    modal_qty: 'Miqdori',
+    modal_total_lbl: 'Jami',
+    promo1_lbl: '% Bugungi aksiya', promo1_title: 'Chegirmalar va maxsus takliflar', promo1_btn: 'Ko\'rish',
+    promo2_lbl: '🕐 Tez yetkazish', promo2_title: 'Odatdagi buyurtmangiz', promo2_sub: '1 bosishda qayta buyurtma bering', promo2_btn: 'Qayta buyurtma',
+    nav_home:'Bosh sahifa', nav_cat:'Kategoriyalar', nav_orders:'Buyurtmalarim', nav_fav:'Sevimlilar', nav_profile:'Profil',
+    toast_added: 'savatga qo\'shildi!',
+    location: 'Zarzamin',
+    special: 'Maxsus takliflar',
+  },
+  tj: {
+    search_ph: 'Маҳсулот ё категорияро ҷӯед...',
+    hero_title: 'Маҳсулоти тоза\nто дари хона!',
+    hero_f1: '🚚 Аз 100с расонидан ройгон',
+    hero_f2: '🌿 Ҳар рӯз маҳсулоти нав ва сифатнок',
+    hero_badge: 'Зуд\nва боэтимод\нрасонидан',
+    add_btn: '+ Ба сабад',
+    added_btn: '✅ Илова шуд',
+    modal_add: '🛒 Ба сабад илова кунед',
+    modal_qty: 'Миқдор',
+    modal_total_lbl: 'Ҷамъ',
+    promo1_lbl: '% Акцияи имрӯза', promo1_title: 'Тахфифҳо ва таклифҳои махсус', promo1_btn: 'Дидан',
+    promo2_lbl: '🕐 Зуд расонидан', promo2_title: 'Фармоиши одатии шумо', promo2_sub: '1 пахш — фармоиш дубора', promo2_btn: 'Фармоиши дубора',
+    nav_home:'Саҳифаи асосӣ', nav_cat:'Категорияҳо', nav_orders:'Фармоишҳо', nav_fav:'Дӯстдоштаҳо', nav_profile:'Профил',
+    toast_added: 'ба сабад илова шуд!',
+    location: 'Зарзамин',
+    special: 'Таклифҳои махсус',
+  }
+};
+
+function setLang(lang, btn) {
+  localStorage.setItem('zargo_lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyLang(lang);
+}
+
+function applyLang(lang) {
+  const t = LANGS[lang] || LANGS.uz;
+  const si = document.getElementById('search-input');
+  if(si) si.placeholder = t.search_ph;
+  // hero
+  const ht = document.querySelector('.hero-title');
+  if(ht) ht.innerHTML = t.hero_title.replace('\n','<br>');
+  const hfs = document.querySelectorAll('.hero-feat');
+  if(hfs[0]) hfs[0].textContent = t.hero_f1;
+  if(hfs[1]) hfs[1].textContent = t.hero_f2;
+  const hb = document.querySelector('.hero-badge-circle');
+  if(hb) hb.innerHTML = t.hero_badge.replace(/\n/g,'<br>') + '<div class="heart">🧡</div>';
+  // add buttons
+  document.querySelectorAll('.p-add').forEach(b=>{ if(!b.classList.contains('added')) b.textContent = t.add_btn; });
+  // modal
+  const ma = document.querySelector('.btn-add-modal');
+  if(ma) ma.textContent = t.modal_add;
+  const ql = document.querySelector('.qty-label');
+  if(ql) ql.textContent = t.modal_qty;
+  // promo
+  const pl = document.querySelectorAll('.promo-label');
+  if(pl[0]) pl[0].textContent = t.promo1_lbl;
+  if(pl[1]) pl[1].textContent = t.promo2_lbl;
+  const pt = document.querySelectorAll('.promo-title');
+  if(pt[0]) pt[0].textContent = t.promo1_title;
+  if(pt[1]) pt[1].textContent = t.promo2_title;
+  const ps = document.querySelector('.promo-sub');
+  if(ps) ps.textContent = t.promo2_sub;
+  const pb = document.querySelectorAll('.promo-btn');
+  if(pb[0]) pb[0].textContent = t.promo1_btn;
+  if(pb[1]) pb[1].textContent = t.promo2_btn;
+  // nav
+  const ni = document.querySelectorAll('.nav-item');
+  const nk = ['nav_home','nav_cat','nav_orders','nav_fav','nav_profile'];
+  ni.forEach((n,i)=>{ if(nk[i]) { const ic=n.querySelector('.nav-icon'); const tx=ic?ic.outerHTML:''; n.innerHTML=tx+t[nk[i]]; } });
+  // special section
+  const sp = document.querySelector('.special-title');
+  if(sp) sp.textContent = t.special;
+  // location
+  const lb = document.querySelector('.location-btn');
+  if(lb) lb.innerHTML = '📍 '+t.location+' ▾';
+}
+
+// Init lang
+(function(){
+  const lang = localStorage.getItem('zargo_lang') || 'uz';
+  const btns = document.querySelectorAll('.lang-btn');
+  btns.forEach(b=>{ b.classList.toggle('active', b.textContent===lang.toUpperCase()); });
+  applyLang(lang);
+})();
 </script>
 </body>
 </html>
