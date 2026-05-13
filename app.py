@@ -240,6 +240,30 @@ def admin_delete_order(number):
     return redirect(url_for('admin_orders'))
 
 
+@app.route('/admin/products')
+@admin_required
+def admin_products():
+    products = db.get_all_products()
+    return render_template('admin/products.html', products=products)
+
+
+@app.route('/admin/products/<product_id>/toggle', methods=['POST'])
+@admin_required
+def admin_toggle_product(product_id):
+    current = request.form.get('available') == 'true'
+    db.update_product(product_id, {'available': not current})
+    return redirect(url_for('admin_products'))
+
+
+@app.route('/admin/products/<product_id>/image', methods=['POST'])
+@admin_required
+def admin_update_image(product_id):
+    image_url = request.form.get('image_url', '').strip()
+    db.update_product(product_id, {'image_url': image_url})
+    flash('Rasm yangilandi!', 'success')
+    return redirect(url_for('admin_products'))
+
+
 # ─── WhatsApp Webhook ─────────────────────────────────────────────────────────
 
 @app.route('/webhook/whatsapp', methods=['GET', 'POST'])

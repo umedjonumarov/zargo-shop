@@ -28,6 +28,7 @@ function doGet(e) {
       case 'orders':         return ok({ orders: getAllOrders() });
       case 'get_order':      return ok({ order: getOrder(e.parameter.number) });
       case 'orders_by_date': return ok({ orders: getOrdersByDate(e.parameter.date) });
+      case 'all_products':   return ok({ products: getAllProducts() });
       default:               return err('Unknown action: ' + action);
     }
   } catch (ex) {
@@ -46,6 +47,7 @@ function doPost(e) {
       case 'update_order_status': return ok(updateOrderStatus(body.number, body.status));
       case 'update_order':        return ok(updateOrder(body.number, body.data));
       case 'delete_order':        return ok(deleteOrder(body.number));
+      case 'update_product':      return ok(updateProduct(body.id, body.data));
       default:                    return err('Unknown action: ' + action);
     }
   } catch (ex) {
@@ -268,4 +270,41 @@ function getProducts() {
     });
   }
   return result;
+}
+
+function getAllProducts() {
+  const sheet  = SS.getSheetByName('products');
+  const data   = sheet.getDataRange().getValues();
+  const result = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const avail = String(data[i][7]).toLowerCase();
+    result.push({
+      id:          data[i][0],
+      name:        data[i][1],
+      category:    data[i][2],
+      description: data[i][3],
+      somoni:      data[i][4],
+      unit:        data[i][5],
+      image_url:   data[i][6],
+      available:   !(avail === 'false' || avail === 'нет' || avail === ''),
+      row:         i + 1,
+    });
+  }
+  return result;
+}
+
+function updateProduct(id, fields) {
+  const sheet = SS.getSheetByName('products');
+  const data  = sheet.getDataRange().getValues();
+  const map   = { name: 2, category: 3, description: 4, somoni: 5, unit: 6, image_url: 7, available: 8 };
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) {
+      for (const [key, col] of Object.entries(map)) {
+        if (fields[key] !== undefined) sheet.getRange(i + 1, col).setValue(fields[key]);
+      }
+      return { updated: true };
+    }
+  }
+  return { updated: false };
 }

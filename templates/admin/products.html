@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ZarGo — Mahsulotlar</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    :root{--gold:#f4a700;--gold2:#ffd700;--dark:#0f0c29;
+          --glass:rgba(255,255,255,.06);--gb:rgba(255,255,255,.11);
+          --text:#f0f0f0;--dim:rgba(255,255,255,.55);--green:#00c896;--red:#ff4d6d;--r:16px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Poppins',sans-serif;background:var(--dark);color:var(--text);min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+      background:radial-gradient(ellipse 80% 50% at 10% 10%,rgba(244,167,0,.11),transparent 55%),
+                 linear-gradient(135deg,#0f0c29,#302b63,#24243e)}
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;z-index:100;
+      background:rgba(15,12,41,.95);border-right:1px solid var(--gb);
+      backdrop-filter:blur(20px);display:flex;flex-direction:column;padding:24px 16px}
+    .sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;text-decoration:none}
+    .sb-logo-icon{width:40px;height:40px;border-radius:10px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      display:flex;align-items:center;justify-content:center;font-size:20px;
+      box-shadow:0 0 18px rgba(244,167,0,.4)}
+    .sb-logo-text{font-size:20px;font-weight:800;
+      background:linear-gradient(90deg,var(--gold),var(--gold2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .sb-nav{display:flex;flex-direction:column;gap:4px;flex:1}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;
+      text-decoration:none;color:var(--dim);font-size:14px;font-weight:500;transition:all .25s}
+    .sb-link:hover,.sb-link.active{background:rgba(244,167,0,.1);color:var(--gold)}
+    .sb-link .icon{font-size:18px;width:22px;text-align:center}
+    .sb-logout{margin-top:auto}
+    .main{margin-left:220px;padding:28px;position:relative;z-index:1;min-height:100vh}
+    .page-title{font-size:22px;font-weight:800;margin-bottom:20px;
+      background:linear-gradient(90deg,var(--gold),var(--gold2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* flash */
+    .flash{padding:10px 14px;border-radius:10px;margin-bottom:16px;font-size:13px}
+    .flash.success{background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.3);color:var(--green)}
+    .flash.error{background:rgba(255,77,109,.12);border:1px solid rgba(255,77,109,.3);color:var(--red)}
+
+    /* grid */
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+
+    /* card */
+    .p-card{background:var(--glass);border:1px solid var(--gb);border-radius:16px;
+      overflow:hidden;transition:transform .2s,border-color .2s}
+    .p-card:hover{transform:translateY(-2px);border-color:rgba(244,167,0,.3)}
+    .p-card.hidden-product{opacity:.55;border-style:dashed}
+
+    .p-img{width:100%;height:160px;object-fit:cover;background:rgba(255,255,255,.04);
+      display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--dim)}
+    .p-img img{width:100%;height:160px;object-fit:cover}
+
+    .p-body{padding:14px}
+    .p-name{font-size:15px;font-weight:700;margin-bottom:2px}
+    .p-cat{font-size:11px;color:var(--dim);margin-bottom:8px}
+    .p-price{font-size:18px;font-weight:800;color:var(--gold);margin-bottom:12px}
+
+    /* toggle */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .badge.on{background:rgba(0,200,150,.15);color:var(--green);border:1px solid rgba(0,200,150,.3)}
+    .badge.off{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.3)}
+
+    .btn-toggle{border:none;cursor:pointer;font-family:'Poppins',sans-serif;
+      font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;transition:all .2s}
+    .btn-toggle.hide{background:rgba(255,77,109,.15);color:var(--red);border:1px solid rgba(255,77,109,.3)}
+    .btn-toggle.hide:hover{background:rgba(255,77,109,.3)}
+    .btn-toggle.show{background:rgba(0,200,150,.15);color:var(--green);border:1px solid rgba(0,200,150,.3)}
+    .btn-toggle.show:hover{background:rgba(0,200,150,.3)}
+
+    /* image form */
+    .img-form{display:flex;gap:6px;align-items:center}
+    .img-input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--gb);
+      border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;
+      font-family:'Poppins',sans-serif;outline:none}
+    .img-input:focus{border-color:var(--gold)}
+    .img-input::placeholder{color:var(--dim)}
+    .btn-img{background:rgba(244,167,0,.15);border:1px solid rgba(244,167,0,.3);
+      color:var(--gold);font-size:12px;font-weight:600;padding:7px 12px;
+      border-radius:8px;cursor:pointer;white-space:nowrap;font-family:'Poppins',sans-serif;
+      transition:all .2s}
+    .btn-img:hover{background:rgba(244,167,0,.3)}
+
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .main{margin-left:0;padding:16px}
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <a href="/admin/dashboard" class="sb-logo">
+    <div class="sb-logo-icon">🛍</div>
+    <div class="sb-logo-text">ZarGo</div>
+  </a>
+  <nav class="sb-nav">
+    <a href="/admin/dashboard" class="sb-link"><span class="icon">📊</span> Dashboard</a>
+    <a href="/admin/orders" class="sb-link"><span class="icon">📦</span> Buyurtmalar</a>
+    <a href="/admin/products" class="sb-link active"><span class="icon">🛒</span> Mahsulotlar</a>
+    <a href="/shop" target="_blank" class="sb-link"><span class="icon">🌐</span> Do'kon</a>
+  </nav>
+  <a href="/admin/logout" class="sb-link sb-logout"><span class="icon">🚪</span> Chiqish</a>
+</div>
+
+<div class="main">
+  <div class="page-title">🛒 Mahsulotlar boshqaruvi</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="products-grid">
+    {% for p in products %}
+    <div class="p-card {% if not p.available %}hidden-product{% endif %}">
+
+      <!-- Rasm -->
+      <div class="p-img">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}"
+               onerror="this.parentElement.innerHTML='📦'"/>
+        {% else %}
+          📦
+        {% endif %}
+      </div>
+
+      <div class="p-body">
+        <div class="p-name">{{ p.name }}</div>
+        <div class="p-cat">{{ p.category or '—' }}</div>
+        <div class="p-price">{{ p.somoni }}с / {{ p.unit or 'dona' }}</div>
+
+        <!-- Ko'rinish holati + toggle -->
+        <div class="toggle-row">
+          <span class="badge {% if p.available %}on{% else %}off{% endif %}">
+            {% if p.available %}✅ Ko'rinadi{% else %}🚫 Yashirin{% endif %}
+          </span>
+          <form method="POST"
+                action="/admin/products/{{ p.id }}/toggle"
+                style="display:inline">
+            <input type="hidden" name="available" value="{{ 'true' if p.available else 'false' }}"/>
+            <button type="submit"
+                    class="btn-toggle {% if p.available %}hide{% else %}show{% endif %}">
+              {% if p.available %}Yashirish{% else %}Ko'rsatish{% endif %}
+            </button>
+          </form>
+        </div>
+
+        <!-- Rasm URL kiritish -->
+        <form method="POST" action="/admin/products/{{ p.id }}/image" class="img-form">
+          <input class="img-input" type="url" name="image_url"
+                 placeholder="Rasm URL ni kiriting..."
+                 value="{{ p.image_url or '' }}"/>
+          <button type="submit" class="btn-img">💾 Saqlash</button>
+        </form>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>

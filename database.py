@@ -74,6 +74,14 @@ class SheetsDB:
     def get_products(self) -> list:
         return self._get('products').get('products', [])
 
+    def get_all_products(self) -> list:
+        """Admin uchun — mavjud bo'lmaganlarni ham qaytaradi"""
+        return self._get('all_products').get('products', [])
+
+    def update_product(self, product_id, data: dict) -> bool:
+        result = self._post('update_product', {'id': product_id, 'data': data})
+        return result.get('success', False)
+
     # ── BUYURTMALAR ──────────────────────────────────────────────────────────
 
     def save_order(self, order_data: dict) -> str | None:
